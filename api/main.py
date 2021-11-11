@@ -26,7 +26,7 @@ def post_package_offset(): #URL: http://127.0.0.1:8001/packages
     
     return response
 
-@app.route("/packages/", methods=['POST'])
+@app.route("/packages/", methods=['GET','POST'])
 def post_package(): #URL: http://127.0.0.1:8001/packages
     #Check if there is an offset given (http://127.0.0.1:8001/packages/)
     offset = 1
