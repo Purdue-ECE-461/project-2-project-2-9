@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "lexical-botany-331616",
+  "private_key_id": "9d3c285a6e48cc467f14ba1f57946e9bbd04b43e",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCy6dxU0b4JsNTE\nsJbAGQg/GMi0A1C0ootRun5MWfpQiL8ExFB3bnCjx/J+OoF6lewMf9fJl5sJXyjx\n669rVOhoxVXqe0gqHnQZeuldMsPiBmbgdnpkRVrZG1v8jqLFcFMNS5PfG4xqkDQP\nAt6iSIKpHNScgxfjbXrbwRrrQXcxM6uy/OgoZqZBhr+ETqgRahQWHP58tYFpGvb2\nnB7Ckf3yxfMM8KCTEAaojtOL6Plkw0DJoOuLy5uGu5sBzOh1S+LOhASyRNnD52nG\nN788/WSfOEt0MGjN47e32PhDsg4gQAwQ5G6PALvy4dGcKNwe5dEWmGfxWlfU8COL\nKlQa8ISjAgMBAAECggEAJ+rhi9MYEVVww0ma+NUc7+b5sKAku4igiOWRFDvnC1zX\nMZsTUPJFE2WjBuLKzKzyc396h7HZl2ex3Pf2tX3GNMoCd0R2P194C89OjcqrxZwk\nC+SjPgfzUwk1ps20J1T+UrMQFPEyjPwLgWXkglSnQk/6Z8kf5VAh3zHgbai3jTRX\n/RARjIFecJFN1ypRFqnTPpJlAq3ZrUjqyE4IEhplpIOsMDqAbniOKBGIyRw/IiJ8\nCoLUmnnFzRgDdXI3lJ3XHwtCYC1HwDo4dpivzlIdVCLqHtlnHNyWbwvvlTU4Eu12\nhsRZj+WvaXCHtCgIf2+PufZnIPoedgulAAwcB7mfwQKBgQDvO5l5Ua6Tm1lOu6Qx\n1qlzna5AwrE292EbWeJ4L9BEXoXKsWrZskGfZI4yQHsMBerrgvQehodRNQo5sLmF\nwT74v1meGYCVXeUjmNIul1tcNB0l8hu7Wj8xc+3dMzObByFO/5sYk+hxzyvF4AW0\na5C4VWr9lm6XkeiAx4pR77Hs8wKBgQC/c/2qorRhMMY1APfphOZXI/sgYdUDaZeK\nkH2OnsJKJKHoxUsCSGaJJmJy9SHwVxQIJ2z7kZF1yyF0sJq0ELZTMiy40tQqY/GG\nRt444UQgeESH1iB6f8xifFJ/A6oFkPythDpO8DfZ0wkwLJzJzDFKT2i2hnVoXpXZ\n9E//BTk1kQKBgQC7Jz8Lf/E5HIEjbPwo2Sw7fJHDrAwDWkgno4veRlmCAwhb56wV\nnrRjw8DSY0tfvolnsUzVTJ0z1HCpbS3WC7X914R+gKjtMUV/MaDMPjCE02gyNVOo\noBNr1quxLssibtOJ/8EP2zYvQsmVxYnw+W2AJ6LJvBPMk6L2jCQTsZbaLQKBgGlw\nOurHsqm4D+DPCLmtvKGPKlW6K3M2qwPf8ZYjLwNgS18DkPzP3NB5uExxXmCbxGd9\nNxMRJ1gFKAa44Gp8rb0B7AlZ6wjxg+mci/Qtc7SiJ7PbpIVybqBqsZBL904bfF0f\nbnFc8JVhGTVTzIGCmD7Bnvyu7mgtdz/Swl/Dg69RAoGBALHga9zegA6Pbdlkbj6k\nGtgSLs4z6gjd8/aB786zUBi85dCcvT1/0TEiYWPyU6VFTMNlKwuletaS3tw/Uoit\nihgvgKq0BZOqEwzvEpA0AfuRXI2jvU9dm65eq/5VcI3fWZ9QVhHqb4M8d2L9z2r7\n1gZqLu3xA7z433WXuT5hFSKZ\n-----END PRIVATE KEY-----\n",
+  "client_email": "ece461@lexical-botany-331616.iam.gserviceaccount.com",
+  "client_id": "104187992041362607226",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/ece461%40lexical-botany-331616.iam.gserviceaccount.com"
+}
