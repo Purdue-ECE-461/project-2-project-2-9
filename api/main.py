@@ -1,11 +1,16 @@
-import sqlite3
+# import sqlite3
 import flask
 import json
 
 app = flask.Flask(__name__)
 
+def test_case():
+    print("*************")
+    print("Hello, World!")
+    print("*************")
+
 #Get Del Put to make for this specific webpage (I want to make sure this works before writing the framework for everything else)
-@app.route("/packages/offset=<offset>", methods=['POST'])
+@app.route("/packages/offset=<offset>", methods=['GET','POST'])
 def post_package_offset(): #URL: http://127.0.0.1:8001/packages
     #Check if there is an offset given (http://127.0.0.1:8001/packages/offset=?)
     offset = flask.request.args.get('offset')
