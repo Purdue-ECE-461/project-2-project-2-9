@@ -1,34 +1,28 @@
-name: Deploy to GAE
-
-# Controls when the workflow will run
-on:
-  # Triggers the workflow on push or pull request events but only for the main branch
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+name: CI
+ 
+on: [push]
+ 
 jobs:
-  deploy:
-    name: Deploying to Google Cloud
+  build:
+ 
     runs-on: ubuntu-latest
-    
+     
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-
-    - name: Deploy to App Engine
-      id: deploy
-      uses: google-github-actions/deploy-appengine@v0.2.0
+    - uses: actions/checkout@v1
+ 
+    - name: Set up Go 1.12
+      uses: actions/setup-go@v1
       with:
-        deliverables: exampleGCP/app.yaml
-        version: v1
-        project_id: ${{ secrets.GCP_PROJECT }}
-        credentials: ${{ secrets.GCP_CREDENTIALS }}
-
-    - name: Test
-      run: curl "${{ steps.deploy.outputs.url }}"
+        go-version: 1.12
+      id: go
+ 
+    - name: Build
+      run: go build
+ 
+    - uses: actions/gcloud/auth@master
+      env:
+        GCLOUD_AUTH: ${{ secrets.GCLOUD_AUTH }}
+ 
+    - uses: actions/gcloud/cli@master
+      with:
+        args: "app deploy --quiet --project=APP_ENGINE_PROJECT_NAME"
