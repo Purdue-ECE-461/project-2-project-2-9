@@ -44,6 +44,7 @@ jobs:
       
     - name: Deploy to App Engine
       id: deploy
+      uses: google-github-actions/deploy-appengine@v0.2.0
       with:
         deliverables: exampleGCP/app.yaml
         project_id: lexical-botany-331616
