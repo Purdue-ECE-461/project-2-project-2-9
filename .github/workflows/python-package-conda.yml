@@ -34,17 +34,17 @@ jobs:
         pytest api/test_api.py
         
     #BEGIN GOOGLE APP ENGINE DEPLOYMENT:
-
+    
     - name: GCP Checkout
       uses: actions/checkout@v2
-
-    - name: Deploy to Google App Engine
+      
+    - name: Deploy to App Engine
       id: deploy
       uses: google-github-actions/deploy-appengine@v0.2.0
       with:
         deliverables: exampleGCP/app.yaml
-        project_id: "lexical-botany-331616" #${{ secrets.GCP_PROJECT }} #Will need to change when found
-        credentials: "9d3c285a6e48cc467f14ba1f57946e9bbd04b43e" #${{ secrets.GCP_SA_KEY }} #Will need to change when found
-
+        project_id: "lexical-botany-331616"
+        credentials: "9d3c285a6e48cc467f14ba1f57946e9bbd04b43e"
+        
     - name: Show Output
-      run: echo ${{ steps.deploy.outputs.url }} #MIGHT need to change (could just be a built-in variable)
+      run: echo ${{ steps.deploy.outputs.url }}
