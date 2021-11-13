@@ -27,8 +27,8 @@ jobs:
       with:
         deliverables: exampleGCP/app.yaml
         version: v1
-        project_id: lexical-botany-331616
-        credentials: 9d3c285a6e48cc467f14ba1f57946e9bbd04b43e
+        project_id: ${{ secrets.GCP_PROJECT }}
+        credentials: ${{ secrets.GCP_CREDENTIALS }}
 
     - name: Test
       run: curl "${{ steps.deploy.outputs.url }}"
