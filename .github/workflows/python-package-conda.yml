@@ -32,3 +32,19 @@ jobs:
       run: |
         conda install pytest
         pytest api/test_api.py
+        
+    #BEGIN GOOGLE APP ENGINE DEPLOYMENT:
+
+    - name: GCP Checkout
+      uses: actions/checkout@v2
+
+    - name: Deploy to Google App Engine
+      id: deploy
+      uses: google-github-actions/deploy-appengine@v0.2.0
+      with:
+        deliverables: example-app/app.yaml
+        project_id: ${{ secrets.GCP_PROJECT }} #Will need to change when found
+        credentials: ${{ secrets.GCP_SA_KEY }} #Will need to change when found
+
+    - name: Show Output
+      run: echo ${{ steps.deploy.outputs.url }} #MIGHT need to change (could just be a built-in variable)
