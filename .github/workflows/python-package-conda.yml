@@ -42,7 +42,7 @@ jobs:
       id: deploy
       uses: google-github-actions/deploy-appengine@v0.2.0
       with:
-        deliverables: example-app/app.yaml
+        deliverables: exampleGCP/app.yaml
         project_id: "lexical-botany-331616" #${{ secrets.GCP_PROJECT }} #Will need to change when found
         credentials: "9d3c285a6e48cc467f14ba1f57946e9bbd04b43e" #${{ secrets.GCP_SA_KEY }} #Will need to change when found
 
