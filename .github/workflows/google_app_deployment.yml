@@ -16,8 +16,8 @@ jobs:
       - name: Setup Cloud SDK
         uses: google-github-actions/setup-gcloud@v0.2.0
         with:
-          project_id: ${{ secrets.GCP_PROJECT }}
-          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          project_id: 'lexical-botany-331616'
+          service_account_key: '9d3c285a6e48cc467f14ba1f57946e9bbd04b43e'
 
       - name: Deploy to App Engine
         run: gcloud app deploy --quiet
