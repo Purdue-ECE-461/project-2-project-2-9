@@ -40,7 +40,7 @@ jobs:
     #BEGIN GOOGLE APP ENGINE DEPLOYMENT:
     
     - name: GCP Checkout
-        uses: actions/checkout@v2
+      uses: actions/checkout@v2
       
     - name: Deploy to App Engine
       id: deploy
