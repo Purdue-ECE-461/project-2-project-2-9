@@ -47,7 +47,7 @@ jobs:
       uses: google-github-actions/deploy-appengine@main
       with:
         deliverables: exampleGCP/app.yaml
-        #project_id: ${{ secrets.GCP_PROJECT }}
+        project_id: ${{ secrets.GCP_PROJECT }}
         credentials: ${{ secrets.GCP_SA_KEY }}
 
     - name: Show Output
