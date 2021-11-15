@@ -49,9 +49,6 @@ jobs:
         deliverables: api/app.yaml
         project_id: ${{ secrets.GCP_PROJECT_ID }}
         credentials: ${{ secrets.GCP_SA_KEY }}
-      
-    # - name: Run Python Server
-    #   run: python api/main.py #This ~could~ be running in the wrong location (i.e. not in deployed instance)
 
     - name: Curl Test
       run: curl "${{ steps.deploy.outputs.url }}/packages/"
