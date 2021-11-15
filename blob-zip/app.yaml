@@ -7,5 +7,5 @@ runtime_config:
 
 #[START gae_flex_storage_yaml]
 env_variables:
-    CLOUD_STORAGE_BUCKET: your-bucket-name
+    CLOUD_STORAGE_BUCKET: lexical-botany-331616.appspot.com
 #[END gae_flex_storage_yaml]
