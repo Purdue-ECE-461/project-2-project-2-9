@@ -1,2 +1,6 @@
-Flask==2.0.1
 google-cloud-datastore==2.4.0
+Flask==1.1.2
+Flask-RESTful==0.3.8
+Jinja2==2.11.2
+PyJWT==1.4.0
+Pyrebase==3.0.27
