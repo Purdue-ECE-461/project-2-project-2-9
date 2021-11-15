@@ -18,11 +18,11 @@ jobs:
       with:
         python-version: '3.10'
     - name: Run Command
-      working-directory: rate/
+      working-directory: ./rate
       run: |
         ./run install
     - name: Test Command
-      working-directory: rate/
+      working-directory: ./rate
       run: |
         ./run test
     
