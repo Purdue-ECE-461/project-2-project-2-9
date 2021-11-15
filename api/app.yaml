@@ -14,5 +14,3 @@ handlers:
   #manual_scaling:
 #  instances: 1
 
-- name: Run Python Server
-  run: python api/main.py #This ~could~ be running in the wrong location (i.e. not in deployed instance
