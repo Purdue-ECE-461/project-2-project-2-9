@@ -3,10 +3,10 @@ name: Given
 on:
   push:
     branches:
-      - main
+      - testBranch
   pull_request:
     branches:
-      - main
+      - testBranch
       
 jobs:
   rate:
