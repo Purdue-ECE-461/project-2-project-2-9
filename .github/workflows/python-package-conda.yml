@@ -51,7 +51,7 @@ jobs:
         credentials: ${{ secrets.GCP_SA_KEY }}
 
     - name: Curl Test
-      run: curl "${{ steps.deploy.outputs.url }}"
+      run: curl "${{ steps.deploy.outputs.url }}/packages/"
     
     - name: Wget Test
-      run: wget "${{ steps.deploy.outputs.url }}"
+      run: wget "${{ steps.deploy.outputs.url }}packages/"
