@@ -10,7 +10,7 @@ jobs:
   build-linux:
     runs-on: ubuntu-latest
     strategy:
-      max-parallel: 5
+      max-parallel: 5 #Probably want to change to 1 at some point (or want to better specify requirements/uses)
 
     steps:
     - uses: actions/checkout@v2
@@ -49,6 +49,9 @@ jobs:
         deliverables: api/app.yaml
         project_id: ${{ secrets.GCP_PROJECT_ID }}
         credentials: ${{ secrets.GCP_SA_KEY }}
+      
+    # - name: Run Python Server
+    #   run: python api/main.py #This ~could~ be running in the wrong location (i.e. not in deployed instance)
 
     - name: Curl Test
       run: curl "${{ steps.deploy.outputs.url }}/packages/"
