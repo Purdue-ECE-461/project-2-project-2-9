@@ -3,10 +3,10 @@ name: Python Package using Conda
 on:
   push:
     branches:
-      - main
+      - testBranch
   pull_request:
     branches:
-      - main
+      - testBranch
     
 
 jobs:

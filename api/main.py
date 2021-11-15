@@ -1,10 +1,13 @@
 # import sqlite3
 import json
-from flask import Flask, jsonify, request, make_response
-from flask_restful import Api, Resource, reqparse, fields, marshal_with
-import jwt
 import datetime
+import jwt
 import pyrebase
+from flask import Flask, request
+from flask_restful import Api, Resource
+
+
+
 
 config = {
   "apiKey": "AIzaSyAgpUJ9lfto0Qn3WX4T_BO6Hp458yWDB2o",
@@ -28,7 +31,7 @@ def test_case():
 @app.route("/packages/offset=<offset>", methods=['GET','POST'])
 def post_package_offset(): #URL: http://127.0.0.1:8001/packages
     #Check if there is an offset given (http://127.0.0.1:8001/packages/offset=?)
-    offset = flask.request.args.get('offset')
+    # offset = flask.request.args.get('offset')
 
     #Just a placeholder for the data that would be returned
     info = {
@@ -43,14 +46,12 @@ def post_package_offset(): #URL: http://127.0.0.1:8001/packages
         status=201,
         mimetype='application/json'
     )
-    
     return response
 
 @app.route("/packages/", methods=['GET','POST'])
 def post_package(): #URL: http://127.0.0.1:8001/packages
     #Check if there is an offset given (http://127.0.0.1:8001/packages/)
-    offset = 1
-    
+    # offset = 1
     #Just a placeholder for the data that would be returned
     info = {
         "Name": "string",
@@ -75,14 +76,13 @@ class Authenticate(Resource):
             # print(data)
             data = json.loads(data)
             # print(data['User']['name'])
-            userInfoDict = data['User']
-            userName = userInfoDict['name']
-            isAdmin = userInfoDict['isAdmin']
-            userPassword = data['Secret']['password']
-            app.config['SECRET_KEY'] = userPassword
-            # print(f'The User is {userName}, it is {isAdmin} that they are an admin and their password is {userPassword}')
-
-            token = jwt.encode({'user' : userName, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=600)}, app.config['SECRET_KEY'])
+            user_info_dict = data['User']
+            user_name = user_info_dict['name']
+            is_admin = user_info_dict['isAdmin']
+            user_password = data['Secret']['password']
+            app.config['SECRET_KEY'] = user_password
+        
+            token = jwt.encode({'user' : user_name, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=600)}, app.config['SECRET_KEY'])
             # print(token.decode("utf-8"))
             # token = json.loads(token)
             token = token.decode("utf-8")
@@ -94,11 +94,11 @@ class Authenticate(Resource):
             db = firebase.database()
 
             # data to save
-            data = {"User": {"name": userName,"isAdmin": isAdmin},"Secret": {"password": userPassword},"Token": token}
+            data = {"User": {"name": user_name,"isAdmin": is_admin},"Secret": {"password": user_password},"Token": token}
             # token_with_additional_claims = auth.create_custom_token(token, {"isAdmin": isAdmin})
 
             # Pass the user's idToken to the push method
-            results = db.child("users").child(userName).set(data)
+            db.child("users").child(user_name).set(data)
 
 
 
