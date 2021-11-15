@@ -5,6 +5,9 @@ dependencies:
 # - anaconda
 - pip
 - flask
+- jwt
+- pyrebase
+- datetime
 # - pip:
 #   - flask
 #   # and for wheels
