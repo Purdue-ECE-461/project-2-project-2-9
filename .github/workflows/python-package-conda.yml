@@ -46,12 +46,12 @@ jobs:
       id: deploy
       uses: google-github-actions/deploy-appengine@main
       with:
-        deliverables: exampleGCP/app.yaml
+        deliverables: api/app.yaml
         project_id: ${{ secrets.GCP_PROJECT_ID }}
         credentials: ${{ secrets.GCP_SA_KEY }}
 
     - name: Curl Test
-      run: curl "${{ steps.deploy.outputs.url }}"
+      run: curl "${{ steps.deploy.outputs.url }}/packages/"
     
     - name: Wget Test
-      run: wget "${{ steps.deploy.outputs.url }}"
+      run: wget "${{ steps.deploy.outputs.url }}/packages/"
