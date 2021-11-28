@@ -78,51 +78,104 @@ app = Flask(__name__)
 auth = firebase.auth()
 api=Api(app)
 
-def test_case():
-    print("*************")
-    print("Hello, World!")
-    print("*************")
+# def test_case():
+#     print("*************")
+#     print("Hello, World!")
+#     print("*************")
 
 #Get Del Put to make for this specific webpage (I want to make sure this works before writing the framework for everything else)
-@app.route("/packages/offset=<offset>", methods=['GET','POST'])
-def post_package_offset(): #URL: http://127.0.0.1:8001/packages
-    #Check if there is an offset given (http://127.0.0.1:8001/packages/offset=?)
-    # offset = flask.request.args.get('offset')
+# @app.route("/packages/offset=<offset>", methods=['GET','POST'])
+# def post_package_offset(): #URL: http://127.0.0.1:8001/packages
+#     #Check if there is an offset given (http://127.0.0.1:8001/packages/offset=?)
+#     # offset = flask.request.args.get('offset')
 
-    #Just a placeholder for the data that would be returned
-    info = {
-        "Name": "string",
-        "Version": "1.2.3",
-        "ID": "string"
-    }
+#     #Just a placeholder for the data that would be returned
+#     info = {
+#         "Name": "string",
+#         "Version": "1.2.3",
+#         "ID": "string"
+#     }
 
-    #This is the official response that will be recieved (error code and data)
-    response = app.response_class(
-        response=json.dumps(info),
-        status=201,
-        mimetype='application/json'
-    )
-    return response
+#     #This is the official response that will be recieved (error code and data)
+#     response = app.response_class(
+#         response=json.dumps(info),
+#         status=201,
+#         mimetype='application/json'
+#     )
+#     return response
 
-@app.route("/packages/", methods=['GET','POST'])
-def post_package(): #URL: http://127.0.0.1:8001/packages
-    #Check if there is an offset given (http://127.0.0.1:8001/packages/)
-    # offset = 1
-    #Just a placeholder for the data that would be returned
-    info = {
-        "Name": "string",
-        "Version": "1.2.3",
-        "ID": "string"
-    }
+# @app.route("/packages/", methods=['GET','POST'])
+# def post_package(): #URL: http://127.0.0.1:8001/packages
+#     #Check if there is an offset given (http://127.0.0.1:8001/packages/)
+#     # offset = 1
+#     #Just a placeholder for the data that would be returned
+#     info = {
+#         "Name": "string",
+#         "Version": "1.2.3",
+#         "ID": "string"
+#     }
 
-    #This is the official response that will be recieved (error code and data)
-    response = app.response_class(
-        response=json.dumps(info),
-        status=201,
-        mimetype='application/json'
-    )
+#     #This is the official response that will be recieved (error code and data)
+#     response = app.response_class(
+#         response=json.dumps(info),
+#         status=201,
+#         mimetype='application/json'
+#     )
     
-    return response
+#     return response
+
+"""
+/packages URLS:
+"""
+@app.route("/packages", methods=['GET'])
+def getPackages():
+   return
+
+"""
+/package/<id> URLS:
+"""
+@app.route("/package/<id>", methods=['GET'])
+def packageRetrieve(id):
+    return
+
+@app.route("/package/<id>", methods=['PUT'])
+def updatePackageVersion(id):
+    return
+
+@app.route("/package/<id>", methods=['DEL'])
+def deletePackageVersion(id):
+    return
+
+@app.route("/package/<id>/rate", methods=['GET'])
+def ratePackage(id):
+    return
+
+"""
+/reset URL:
+"""
+@app.route("/reset", methods=['DEL'])
+def resetRegistry():
+    return
+
+"""
+/package URL:
+"""
+@app.route("/package", methods=['POST'])
+def createPackage():
+    return
+
+"""
+/package/byName/<name> URLS:
+"""
+@app.route("/package/byName/<name>", methods=['GET'])
+def getPackageByName(name):
+    return
+
+@app.route("/package/byName/<name>", methods=['DEL'])
+def deletePackageVersions(name):
+
+    return
+
 
 class Authenticate(Resource):
     # @marshal_with(metadata_payload)
