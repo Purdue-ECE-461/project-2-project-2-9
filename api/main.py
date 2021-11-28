@@ -3,6 +3,8 @@ import datetime
 import jwt
 import pyrebase
 
+import main_rate as rate
+
 from flask import Flask, request
 from flask_restful import Api, Resource
 
@@ -74,19 +76,48 @@ def getPackages():
 """
 @app.route("/package/<id>", methods=['GET'])
 def packageRetrieve(id):
-    return
+    request.get_data()    
 
-@app.route("/package/<id>", methods=['PUT'])
-def updatePackageVersion(id):
+    if(checkAuth() == 0): 
+        return 401, {'code': 401, 'message': 'Error!  You do not have the permissions to view this item!'}
+
+    results = GCP.Client().query(kind='package').add_filter('ID', '=', id).fetch()
+    if(len(list(results)) != 0):
+        #Query database for package by ID
+        pack = results.get(results.key('package', id))
+
+        api_response = {
+            'metadata': {
+                    'Name': pack['Name'],
+                    'Version': pack['Version'],
+                    'ID': pack['ID']
+                },
+                'data': {
+                    'Content': pack['Content'],
+                    'URL': pack['URL'],
+                    'JSProgram': pack['JSProgram']
+                }   
+            }
+        return 200, api_response
+
+    return 400, {'code': 400, 'message': 'Error! Something went wrong when processing your request!  Please ensure that your request was made properly!'}
+
+def checkAuth():
     #Get & process authentification
     auth_token = request.headers.get('X-Authorization').split()[1]
 
     #Check permissions:
     #   1. Search db of Users with auth_token as filter:
     auth_validation = GCP.Client().query(kind='User').addfilter('Token', '=', auth_token)
-    #   2. Get results & check if the query yields any Users
-    if(len(list(auth_validation.fetch())) == 0): 
-        return {'code': 401, 'message': 'Error!  You do not have the permissions to view this item!'}
+    #   2. Get results & return if the query yields any Users
+    return len(list(auth_validation.fetch()))
+
+@app.route("/package/<id>", methods=['PUT'])
+def updatePackageVersion(id):
+    request.get_data()
+
+    if(checkAuth() == 0): 
+        return 401, {'code': 401, 'message': 'Error!  You do not have the permissions to view this item!'}
 
     #Load Request Body as JSON:
     req_body = json.loads(request.data.decode('utf-8'))
@@ -96,7 +127,7 @@ def updatePackageVersion(id):
         metadata = req_body['metadata']
         data = req_body['data']
     except Exception:
-        return {'code': 400, 'message': 'Error! Something went wrong when parsing your request!\nAre you sure your request was formatted correctly?'}
+        return 400, {'code': 400, 'message': 'Malformed request (e.g. no such package).'}
     
     #Check that Metadata matches URL
     if(id == req_body['ID']):
@@ -106,7 +137,7 @@ def updatePackageVersion(id):
         search.add_filter('Name', '=', metadata['Name']).add_filter('Version', '=', metadata['Version'])
         if(len(list(search.fetch())) != 0): #Valid identifier pair:
             #Hide most recent package:
-            former_version = GCP.get(GCP.key('package', id))
+            former_version = search.fetch().get(search.fetch().key('package', id))
             package_payload = GCP.Entity(former_version, exclude_from_indexes=['Content'])
 
             #Update with newest version with metadata and data info:
@@ -124,17 +155,61 @@ def updatePackageVersion(id):
             })
 
             GCP.put(package_payload)
-            return {'code': 200, 'Payload': package_payload}
+            return 200, {'code': 200, 'Payload': package_payload}
 
-    return {'code' : 400, 'message': 'Error! Something went wrong when parsing your request!\nPlease check to make sure your request was formatted correctly!'}
+    return 400, {'code' : 400, 'message': 'Malformed request (e.g. no such package).'}
 
 @app.route("/package/<id>", methods=['DEL'])
 def deletePackageVersion(id):
-    return
+    request.get_data()
+    
+    if(checkAuth() == 0): 
+        return 401, {'code': 401, 'message': 'Error!  You do not have the permissions to delete this item!'}    
+
+    #Query packages to find package {id}
+    results = GCP.Client().query(kind='package').add_filter('ID', '=', id).fetch()
+    if(len(list(results)) != 0):
+        #Delete package by ID:
+        results.delete(GCP.key('package', id))
+        return 200, {'code': 200, 'message': 'Package is deleted.'}
+
+    return 400, {'code': 400, 'message':'No such package.'}
 
 @app.route("/package/<id>/rate", methods=['GET'])
 def ratePackage(id):
-    return
+    #Get & process authentification
+    auth_token = request.headers.get('X-Authorization').split()[1]
+
+    results = GCP.Client().query(kind='package').add_filter('ID', '=', id).fetch()
+
+    if(checkAuth(auth_token) == 0): 
+        return 401, {'code': 401, 'message': 'Error!  You do not have the permissions to view this item!'}
+
+    results = GCP.Client().query(kind='package').add_filter('ID', '=', id).fetch()
+
+    if(len(list(results)) != 0):
+        #Query database for package by ID
+        pack = results.get(results.key('package', id))
+
+        try:
+            netScore, rampUpScore, correctnessScore, busFactorScore, responsiveMaintainerScore, licenseScore = rate.call_main(pack['URL'])
+
+            api_response = {{
+            'BusFactor': busFactorScore,
+            'Correctness': correctnessScore,
+            'RampUp': rampUpScore,
+            'ResponsiveMaintainer': responsiveMaintainerScore,
+            'LicenseScore': licenseScore,
+            'GoodPinningPractice': 0 #TODO:!!!
+            }}
+
+            
+        except Exception:
+            return 500, {'code': 500, 'message': "The package rating system choked on at least one of the metrics."}
+        return 200, api_response
+
+    return 400, {'code': 400, 'message': 'No such package.'}
+    
 
 """
 /reset URL:
