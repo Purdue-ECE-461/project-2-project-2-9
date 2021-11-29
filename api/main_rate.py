@@ -74,8 +74,7 @@ def main() -> None:
     print('URL NET_SCORE RAMP_UP_SCORE CORRECTNESS_SCORE BUS_FACTOR_SCORE RESPONSIVE_MAINTAINER_SCORE LICENSE_SCORE')
     for repoUrl, _ in reversed(sorted(repoList, key=lambda x: x[1])):
         repoMetrics = repoMetricsDict[repoUrl]
-        # print(f"{repoUrl} {repoMetrics.netScore} {repoMetrics.rampUpScore} {repoMetrics.correctnessScore} {repoMetrics.busFactorScore} {repoMetrics.responsiveMaintainerScore} {repoMetrics.licenseScore}")
-        return repoMetrics.netScore, repoMetrics.rampUpScore, repoMetrics.correctnessScore, repoMetrics.busFactorScore, repoMetrics.responsiveMaintainerScore, repoMetrics.licenseScore
+        print(f"{repoUrl} {repoMetrics.netScore} {repoMetrics.rampUpScore} {repoMetrics.correctnessScore} {repoMetrics.busFactorScore} {repoMetrics.responsiveMaintainerScore} {repoMetrics.licenseScore}")
 
 
 def call_main(url):

@@ -1,70 +1,15 @@
-# # import sqlite3
-# import flask
-# import json
-
-# app = flask.Flask(__name__)
-
-# def test_case():
-#     print("*************")
-#     print("Hello, World!")
-#     print("*************")
-
-# #Get Del Put to make for this specific webpage (I want to make sure this works before writing the framework for everything else)
-# @app.route("/packages/offset=<offset>", methods=['GET','POST'])
-# def post_package_offset(): #URL: http://127.0.0.1:8001/packages
-#     #Check if there is an offset given (http://127.0.0.1:8001/packages/offset=?)
-#     offset = flask.request.args.get('offset')
-
-#     #Just a placeholder for the data that would be returned
-#     info = {
-#         "Name": "string",
-#         "Version": "1.2.3",
-#         "ID": "string"
-#     }
-
-#     #This is the official response that will be recieved (error code and data)
-#     response = app.response_class(
-#         response=json.dumps(info),
-#         status=201,
-#         mimetype='application/json'
-#     )
-    
-#     return response
-
-# @app.route("/packages/", methods=['GET','POST'])
-# def post_package(): #URL: http://127.0.0.1:8001/packages
-#     #Check if there is an offset given (http://127.0.0.1:8001/packages/)
-#     offset = 1
-    
-#     #Just a placeholder for the data that would be returned
-#     info = {
-#         "Name": "string",
-#         "Version": "1.2.3",
-#         "ID": "string"
-#     }
-
-#     #This is the official response that will be recieved (error code and data)
-#     response = app.response_class(
-#         response=json.dumps(info),
-#         status=201,
-#         mimetype='application/json'
-#     )
-    
-#     return response
-
-# if __name__ == '__main__':
-# 	# Start the server on "127.0.0.1:8001"
-#     app.run(port=8001, host='127.0.0.1', debug=True, use_evalex=False)
 import json
 import datetime
 import jwt
 import pyrebase
+
 from flask import Flask, jsonify
 from flask_restful import Api, Resource, request
 from google.cloud import firestore
 
+import main_rate as rate
 
-
+from google.cloud import datastore as GCP
 
 config = {
   "apiKey": "AIzaSyAgpUJ9lfto0Qn3WX4T_BO6Hp458yWDB2o",
@@ -78,11 +23,6 @@ app = Flask(__name__)
 # db = firebase.database()
 auth = firebase.auth()
 api=Api(app)
-
-# def test_case():
-#     print("*************")
-#     print("Hello, World!")
-#     print("*************")
 
 #Get Del Put to make for this specific webpage (I want to make sure this works before writing the framework for everything else)
 # @app.route("/packages/offset=<offset>", methods=['GET','POST'])
@@ -126,10 +66,33 @@ api=Api(app)
 #     return response
 
 """
+Begin helper functions:
+"""
+
+def convertJSONFormat(code, data):
+    response = app.response_class(
+        response=json.dumps(data),
+        status=code,
+        mimetype='application/json'
+    )
+    return response
+
+def checkAuth():
+    #Get & process authentification
+    auth_token = request.headers.get('X-Authorization').split()[1]
+
+    #Check permissions:
+    #   1. Search db of Users with auth_token as filter:
+    auth_validation = GCP.Client().query(kind='User').addfilter('Token', '=', auth_token)
+    #   2. Get results & return if the query yields any Users
+    return len(list(auth_validation.fetch()))
+
+"""
 /packages URLS:
 """
 @app.route("/packages", methods=['POST'])
 def getPackages():
+    
    return
 
 """
@@ -137,25 +100,136 @@ def getPackages():
 """
 @app.route("/package/<id>", methods=['GET'])
 def packageRetrieve(id):
-    return
+    request.get_data()    
+
+    if(checkAuth() == 0): 
+        return convertJSONFormat(401, {'code': 401, 'message': 'Error!  You do not have the permissions to view this item!'})
+
+    results = GCP.Client().query(kind='package').add_filter('ID', '=', id).fetch()
+    if(len(list(results)) != 0):
+        #Query database for package by ID
+        pack = results.get(results.key('package', id))
+
+        api_response = {
+            'metadata': {
+                    'Name': pack['Name'],
+                    'Version': pack['Version'],
+                    'ID': pack['ID']
+                },
+                'data': {
+                    'Content': pack['Content'],
+                    'URL': pack['URL'],
+                    'JSProgram': pack['JSProgram']
+                }   
+            }
+        return convertJSONFormat(200, api_response)
+
+    return convertJSONFormat(400, {'code': 400, 'message': 'Error! Something went wrong when processing your request!  Please ensure that your request was made properly!'})
 
 @app.route("/package/<id>", methods=['PUT'])
 def updatePackageVersion(id):
-    return
+    request.get_data()
+
+    if(checkAuth() == 0): 
+        return convertJSONFormat(401, {'code': 401, 'message': 'Error!  You do not have the permissions to view this item!'})
+
+    #Load Request Body as JSON:
+    req_body = json.loads(request.data.decode('utf-8'))
+
+    #Parse Data as metadata and data:
+    try:
+        metadata = req_body['metadata']
+        data = req_body['data']
+    except Exception:
+        return convertJSONFormat(400, {'code': 400, 'message': 'Malformed request (e.g. no such package).'})
+    
+    #Check that Metadata matches URL
+    if(id == req_body['ID']):
+        #Select from database to make sure package exists:
+        search =  GCP.Client().query(kind='package')
+        #Add filters for name and version (specified as a unique identifier pair)
+        search.add_filter('Name', '=', metadata['Name']).add_filter('Version', '=', metadata['Version'])
+        if(len(list(search.fetch())) != 0): #Valid identifier pair:
+            #Hide most recent package:
+            former_version = search.fetch().get(search.fetch().key('package', id))
+            package_payload = GCP.Entity(former_version, exclude_from_indexes=['Content'])
+
+            #Update with newest version with metadata and data info:
+            package_payload.update({
+                'metadata':{
+                    'Name': metadata['Name'],
+                    'Version': metadata['Version'],
+                    'ID': metadata['ID']
+                },
+                'data':{
+                    'Content': data['Content'],
+                    'URL': data['URL'],
+                    'JSProgram': data['JSProgram']
+                }
+            })
+
+            GCP.put(package_payload)
+            return convertJSONFormat(200, {'code': 200, 'Payload': package_payload})
+
+    return convertJSONFormat(400, {'code' : 400, 'message': 'Malformed request (e.g. no such package).'})
 
 @app.route("/package/<id>", methods=['DEL'])
 def deletePackageVersion(id):
-    return
+    request.get_data()
+    
+    if(checkAuth() == 0): 
+        return convertJSONFormat(401, {'code': 401, 'message': 'Error!  You do not have the permissions to delete this item!'})
+
+    #Query packages to find package {id}
+    results = GCP.Client().query(kind='package').add_filter('ID', '=', id).fetch()
+    if(len(list(results)) != 0):
+        #Delete package by ID:
+        results.delete(GCP.key('package', id))
+        return convertJSONFormat(200, {'code': 200, 'message': 'Package is deleted.'})
+
+    return convertJSONFormat(400, {'code': 400, 'message':'No such package.'})
 
 @app.route("/package/<id>/rate", methods=['GET'])
 def ratePackage(id):
-    return
+    request.get_data()
+
+    results = GCP.Client().query(kind='package').add_filter('ID', '=', id).fetch()
+
+    if(checkAuth() == 0): 
+        return convertJSONFormat(401, {'code': 401, 'message': 'Error!  You do not have the permissions to view this item!'})
+
+    results = GCP.Client().query(kind='package').add_filter('ID', '=', id).fetch()
+
+    if(len(list(results)) != 0):
+        #Query database for package by ID
+        pack = results.get(results.key('package', id))
+
+        try:
+            netScore, rampUpScore, correctnessScore, busFactorScore, responsiveMaintainerScore, licenseScore = rate.call_main(pack['URL'])
+
+            api_response = {{
+            'BusFactor': busFactorScore,
+            'Correctness': correctnessScore,
+            'RampUp': rampUpScore,
+            'ResponsiveMaintainer': responsiveMaintainerScore,
+            'LicenseScore': licenseScore,
+            'GoodPinningPractice': 0 #TODO:!!!
+            }}
+
+
+        except Exception:
+            return convertJSONFormat(500, {'code': 500, 'message': "The package rating system choked on at least one of the metrics."})
+        return convertJSONFormat(200, api_response)
+
+    return convertJSONFormat(400, {'code': 400, 'message': 'No such package.'})
+    
 
 """
 /reset URL:
 """
 @app.route("/reset", methods=['DEL'])
 def resetRegistry():
+
     return
 
 """
@@ -176,7 +250,6 @@ def getPackageByName(name):
 def deletePackageVersions(name):
 
     return
-
 
 class Authenticate(Resource):
     # @marshal_with(metadata_payload)
