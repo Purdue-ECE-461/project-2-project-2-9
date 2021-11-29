@@ -3,10 +3,11 @@ import datetime
 import jwt
 import pyrebase
 
-import main_rate as rate
+from flask import Flask, jsonify
+from flask_restful import Api, Resource, request
+from google.cloud import firestore
 
-from flask import Flask, request
-from flask_restful import Api, Resource
+import main_rate as rate
 
 from google.cloud import datastore as GCP
 
@@ -89,7 +90,7 @@ def checkAuth():
 """
 /packages URLS:
 """
-@app.route("/packages", methods=['GET'])
+@app.route("/packages", methods=['POST'])
 def getPackages():
     
    return
