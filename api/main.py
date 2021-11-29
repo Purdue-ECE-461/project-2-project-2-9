@@ -190,12 +190,11 @@ def deletePackageVersion(id):
 
 @app.route("/package/<id>/rate", methods=['GET'])
 def ratePackage(id):
-    #Get & process authentification
-    auth_token = request.headers.get('X-Authorization').split()[1]
+    request.get_data()
 
     results = GCP.Client().query(kind='package').add_filter('ID', '=', id).fetch()
 
-    if(checkAuth(auth_token) == 0): 
+    if(checkAuth() == 0): 
         return convertJSONFormat(401, {'code': 401, 'message': 'Error!  You do not have the permissions to view this item!'})
 
     results = GCP.Client().query(kind='package').add_filter('ID', '=', id).fetch()
@@ -229,6 +228,7 @@ def ratePackage(id):
 """
 @app.route("/reset", methods=['DEL'])
 def resetRegistry():
+
     return
 
 """
