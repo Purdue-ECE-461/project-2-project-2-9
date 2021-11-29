@@ -65,10 +65,33 @@ api=Api(app)
 #     return response
 
 """
+Begin helper functions:
+"""
+
+def convertJSONFormat(code, data):
+    response = app.response_class(
+        response=json.dumps(data),
+        status=code,
+        mimetype='application/json'
+    )
+    return response
+
+def checkAuth():
+    #Get & process authentification
+    auth_token = request.headers.get('X-Authorization').split()[1]
+
+    #Check permissions:
+    #   1. Search db of Users with auth_token as filter:
+    auth_validation = GCP.Client().query(kind='User').addfilter('Token', '=', auth_token)
+    #   2. Get results & return if the query yields any Users
+    return len(list(auth_validation.fetch()))
+
+"""
 /packages URLS:
 """
 @app.route("/packages", methods=['GET'])
 def getPackages():
+    
    return
 
 """
@@ -79,7 +102,7 @@ def packageRetrieve(id):
     request.get_data()    
 
     if(checkAuth() == 0): 
-        return 401, {'code': 401, 'message': 'Error!  You do not have the permissions to view this item!'}
+        return convertJSONFormat(401, {'code': 401, 'message': 'Error!  You do not have the permissions to view this item!'})
 
     results = GCP.Client().query(kind='package').add_filter('ID', '=', id).fetch()
     if(len(list(results)) != 0):
@@ -98,26 +121,16 @@ def packageRetrieve(id):
                     'JSProgram': pack['JSProgram']
                 }   
             }
-        return 200, api_response
+        return convertJSONFormat(200, api_response)
 
-    return 400, {'code': 400, 'message': 'Error! Something went wrong when processing your request!  Please ensure that your request was made properly!'}
-
-def checkAuth():
-    #Get & process authentification
-    auth_token = request.headers.get('X-Authorization').split()[1]
-
-    #Check permissions:
-    #   1. Search db of Users with auth_token as filter:
-    auth_validation = GCP.Client().query(kind='User').addfilter('Token', '=', auth_token)
-    #   2. Get results & return if the query yields any Users
-    return len(list(auth_validation.fetch()))
+    return convertJSONFormat(400, {'code': 400, 'message': 'Error! Something went wrong when processing your request!  Please ensure that your request was made properly!'})
 
 @app.route("/package/<id>", methods=['PUT'])
 def updatePackageVersion(id):
     request.get_data()
 
     if(checkAuth() == 0): 
-        return 401, {'code': 401, 'message': 'Error!  You do not have the permissions to view this item!'}
+        return convertJSONFormat(401, {'code': 401, 'message': 'Error!  You do not have the permissions to view this item!'})
 
     #Load Request Body as JSON:
     req_body = json.loads(request.data.decode('utf-8'))
@@ -127,7 +140,7 @@ def updatePackageVersion(id):
         metadata = req_body['metadata']
         data = req_body['data']
     except Exception:
-        return 400, {'code': 400, 'message': 'Malformed request (e.g. no such package).'}
+        return convertJSONFormat(400, {'code': 400, 'message': 'Malformed request (e.g. no such package).'})
     
     #Check that Metadata matches URL
     if(id == req_body['ID']):
@@ -155,25 +168,25 @@ def updatePackageVersion(id):
             })
 
             GCP.put(package_payload)
-            return 200, {'code': 200, 'Payload': package_payload}
+            return convertJSONFormat(200, {'code': 200, 'Payload': package_payload})
 
-    return 400, {'code' : 400, 'message': 'Malformed request (e.g. no such package).'}
+    return convertJSONFormat(400, {'code' : 400, 'message': 'Malformed request (e.g. no such package).'})
 
 @app.route("/package/<id>", methods=['DEL'])
 def deletePackageVersion(id):
     request.get_data()
     
     if(checkAuth() == 0): 
-        return 401, {'code': 401, 'message': 'Error!  You do not have the permissions to delete this item!'}    
+        return convertJSONFormat(401, {'code': 401, 'message': 'Error!  You do not have the permissions to delete this item!'})
 
     #Query packages to find package {id}
     results = GCP.Client().query(kind='package').add_filter('ID', '=', id).fetch()
     if(len(list(results)) != 0):
         #Delete package by ID:
         results.delete(GCP.key('package', id))
-        return 200, {'code': 200, 'message': 'Package is deleted.'}
+        return convertJSONFormat(200, {'code': 200, 'message': 'Package is deleted.'})
 
-    return 400, {'code': 400, 'message':'No such package.'}
+    return convertJSONFormat(400, {'code': 400, 'message':'No such package.'})
 
 @app.route("/package/<id>/rate", methods=['GET'])
 def ratePackage(id):
@@ -183,7 +196,7 @@ def ratePackage(id):
     results = GCP.Client().query(kind='package').add_filter('ID', '=', id).fetch()
 
     if(checkAuth(auth_token) == 0): 
-        return 401, {'code': 401, 'message': 'Error!  You do not have the permissions to view this item!'}
+        return convertJSONFormat(401, {'code': 401, 'message': 'Error!  You do not have the permissions to view this item!'})
 
     results = GCP.Client().query(kind='package').add_filter('ID', '=', id).fetch()
 
@@ -203,12 +216,12 @@ def ratePackage(id):
             'GoodPinningPractice': 0 #TODO:!!!
             }}
 
-            
-        except Exception:
-            return 500, {'code': 500, 'message': "The package rating system choked on at least one of the metrics."}
-        return 200, api_response
 
-    return 400, {'code': 400, 'message': 'No such package.'}
+        except Exception:
+            return convertJSONFormat(500, {'code': 500, 'message': "The package rating system choked on at least one of the metrics."})
+        return convertJSONFormat(200, api_response)
+
+    return convertJSONFormat(400, {'code': 400, 'message': 'No such package.'})
     
 
 """
@@ -236,7 +249,6 @@ def getPackageByName(name):
 def deletePackageVersions(name):
 
     return
-
 
 class Authenticate(Resource):
     # @marshal_with(metadata_payload)
