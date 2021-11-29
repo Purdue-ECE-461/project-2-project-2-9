@@ -127,7 +127,7 @@ api=Api(app)
 """
 /packages URLS:
 """
-@app.route("/packages", methods=['GET'])
+@app.route("/packages", methods=['POST'])
 def getPackages():
    return
 
