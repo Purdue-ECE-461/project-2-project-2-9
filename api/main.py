@@ -88,14 +88,6 @@ def checkAuth():
     return len(list(auth_validation.fetch()))
 
 """
-/packages URLS:
-"""
-@app.route("/packages", methods=['POST'])
-def getPackages():
-    
-   return
-
-"""
 /package/<id> URLS:
 """
 @app.route("/package/<id>", methods=['GET'])
@@ -223,7 +215,6 @@ def ratePackage(id):
 
     return convertJSONFormat(400, {'code': 400, 'message': 'No such package.'})
     
-
 """
 /reset URL:
 """
@@ -245,11 +236,67 @@ def resetRegistry():
         return convertJSONFormat(401, {'code': 401, 'message': 'Something went wrong when trying to reset the registry!'})
 
 """
+/packages URLS:
+"""
+@app.route("/packages", methods=['POST'])
+def getPackages():
+    request.get_data()
+
+    offset = -1
+    try:
+        offset = request.args.get('offset')
+    except Exception:
+        pass
+    
+    if(checkAuth() == 0): 
+        return convertJSONFormat(401, {'code': 401, 'message': 'You do not have permission to view the registry.'})
+
+    try:
+        #Query for all packages:
+        packages = GCP.Client().query(kind='package')
+
+        response = []
+
+        for i in packages:
+            offset -= 1
+            if offset >= 0:
+                response.append({
+                'id': i['id'],        
+                'name': i['name'],        
+                'tag': i['tag']
+                })
+        return convertJSONFormat(200, response)
+    except Exception:
+        return convertJSONFormat(400, {'code': 400, 'message': 'Error! Something went wrong when processing your request!'})
+
+"""
 /package URL:
 """
 @app.route("/package", methods=['POST'])
 def createPackage():
-    return
+    request.get_data()
+    
+    if(checkAuth() == 0): 
+        return convertJSONFormat(401, {'code': 401, 'message': 'You do not have permission to add to the registry.'})
+    
+    #Load Request Body as JSON:
+    req_body = json.loads(request.data.decode('utf-8'))
+
+    #Parse Data as metadata and data:
+    try:
+        metadata = req_body['metadata']
+        data = req_body['data']
+    except Exception:
+        return convertJSONFormat(400, {'code': 400, 'message': 'Malformed request.'})
+
+    #Check if package exists:
+    if list(GCP.Client().query(kind='package').filter('ID', '=', metadata['id']).fetch()):
+        return convertJSONFormat(403, {'code': 403, 'message': 'Package exists already.'})
+
+    data = {'Name': metadata['Name'], 'Version': metadata['Version'], 'ID': metadata['ID']}
+    GCP.put(data)
+    
+    return convertJSONFormat(201, data)
 
 """
 /package/byName/<name> URLS:
