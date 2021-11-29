@@ -59,8 +59,9 @@ import json
 import datetime
 import jwt
 import pyrebase
-from flask import Flask, request
-from flask_restful import Api, Resource
+from flask import Flask, jsonify
+from flask_restful import Api, Resource, request
+from google.cloud import firestore
 
 
 
