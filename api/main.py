@@ -98,7 +98,7 @@ def packageRetrieve(id):
         return convertJSONFormat(401, {'code': 401, 'message': 'Error!  You do not have the permissions to view this item!'})
 
     results = GCP.Client().query(kind='package').add_filter('ID', '=', id).fetch()
-    if(len(list(results)) != 0):
+    if(list(results) != []):
         #Query database for package by ID
         pack = results.get(results.key('package', id))
 
@@ -141,7 +141,7 @@ def updatePackageVersion(id):
         search =  GCP.Client().query(kind='package')
         #Add filters for name and version (specified as a unique identifier pair)
         search.add_filter('Name', '=', metadata['Name']).add_filter('Version', '=', metadata['Version'])
-        if(len(list(search.fetch())) != 0): #Valid identifier pair:
+        if(list(search.fetch()) != []): #Valid identifier pair:
             #Hide most recent package:
             former_version = search.fetch().get(search.fetch().key('package', id))
             package_payload = GCP.Entity(former_version, exclude_from_indexes=['Content'])
@@ -174,7 +174,7 @@ def deletePackageVersion(id):
 
     #Query packages to find package {id}
     results = GCP.Client().query(kind='package').add_filter('ID', '=', id).fetch()
-    if(len(list(results)) != 0):
+    if(list(results) != []):
         #Delete package by ID:
         results.delete(GCP.key('package', id))
         return convertJSONFormat(200, {'code': 200, 'message': 'Package is deleted.'})
@@ -192,7 +192,7 @@ def ratePackage(id):
 
     results = GCP.Client().query(kind='package').add_filter('ID', '=', id).fetch()
 
-    if(len(list(results)) != 0):
+    if(list(results) != []):
         #Query database for package by ID
         pack = results.get(results.key('package', id))
 
@@ -290,7 +290,7 @@ def createPackage():
         return convertJSONFormat(400, {'code': 400, 'message': 'Malformed request.'})
 
     #Check if package exists:
-    if list(GCP.Client().query(kind='package').filter('ID', '=', metadata['id']).fetch()):
+    if list(GCP.Client().query(kind='package').add_filter('ID', '=', metadata['id']).fetch()):
         return convertJSONFormat(403, {'code': 403, 'message': 'Package exists already.'})
 
     data = {'Name': metadata['Name'], 'Version': metadata['Version'], 'ID': metadata['ID']}
@@ -303,12 +303,47 @@ def createPackage():
 """
 @app.route("/package/byName/<name>", methods=['GET'])
 def getPackageByName(name):
-    return
+    request.get_data()
+    
+    if(checkAuth() == 0): 
+        return convertJSONFormat(401, {'code': 401, 'message': 'You do not have permission to view the package.'})
+
+    #Query for all packages:
+    packages = GCP.Client().query(kind='package').add_filter('Name','=',name).fetch()
+
+    if(list(packages)==[]):
+        return convertJSONFormat(400, {'code': 400, 'message': 'No such package.'})
+
+    try:
+        data = { 
+            'id': packages['id'],
+            'name': name,
+            'tag': packages['tag']
+        }
+        return convertJSONFormat(200, data)
+    except Exception:
+        return convertJSONFormat(400, {'code': 400, 'message': 'Error in retrieving package.'})
+    
 
 @app.route("/package/byName/<name>", methods=['DEL'])
 def deletePackageVersions(name):
+    request.get_data()
+    
+    if(checkAuth() == 0): 
+        return convertJSONFormat(401, {'code': 401, 'message': 'You do not have permission to modify the package.'})
 
-    return
+    #Query for all packages:
+    packages = GCP.Client().query(kind='package').add_filter('Name','=',name).fetch()
+
+    if(list(packages)==[]):
+        return convertJSONFormat(400, {'code': 400, 'message': 'No such package.'})
+
+    try:
+        packages.delete(GCP.key('package', packages['id']))
+        return convertJSONFormat(200, {'code': 200, 'message': 'Package is deleted.'})
+    except Exception:
+        return convertJSONFormat(400, {'code': 400, 'message': 'Error in deleting package.'})
+    
 
 class Authenticate(Resource):
     # @marshal_with(metadata_payload)
