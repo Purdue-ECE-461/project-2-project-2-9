@@ -229,8 +229,20 @@ def ratePackage(id):
 """
 @app.route("/reset", methods=['DEL'])
 def resetRegistry():
+    request.get_data()
+    
+    if(checkAuth() == 0): 
+        return convertJSONFormat(401, {'code': 401, 'message': 'You do not have permission to reset the registry.'})
 
-    return
+    #Query for all packages:
+    packages = GCP.Client().query(kind='package')
+
+    try:
+        for i in packages:
+            GCP.delete(i)
+        return convertJSONFormat(200, {'code': 200, 'message': 'Registry is reset.'})
+    except Exception:
+        return convertJSONFormat(401, {'code': 401, 'message': 'Something went wrong when trying to reset the registry!'})
 
 """
 /package URL:
