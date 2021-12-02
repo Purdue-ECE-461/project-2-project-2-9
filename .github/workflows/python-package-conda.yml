@@ -34,6 +34,7 @@ jobs:
         conda install -c conda-forge git
         conda install -c conda-forge gitpython
         conda install -c conda-forge backports
+        conda install -c conda-forge backports-datetime-fromisoformat
     - name: Lint with flake8
       run: |
         conda install flake8
