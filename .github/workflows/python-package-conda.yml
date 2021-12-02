@@ -30,6 +30,7 @@ jobs:
         conda env update --file .github/workflows/environment.yml --name base
         conda install -c conda-forge google-cloud-firestore
         conda install -c conda-forge google-cloud-datastore
+        conda install -c conda-forge python-dotenv
     - name: Lint with flake8
       run: |
         conda install flake8
