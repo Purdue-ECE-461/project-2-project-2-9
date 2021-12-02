@@ -6,6 +6,7 @@ dependencies:
 - pip
 - flask
 - pip:
+  - git
   - jwt
   - pyrebase
   - datetime
