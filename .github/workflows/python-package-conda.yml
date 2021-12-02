@@ -28,8 +28,8 @@ jobs:
     - name: Install dependencies
       run: |
         conda env update --file .github/workflows/environment.yml --name base
-        conda install google-cloud-firestore
-        conda install google-cloud-datastore
+        conda install -c conda-forge google-cloud-firestore
+        conda install -c conda-forge google-cloud-datastore
     - name: Lint with flake8
       run: |
         conda install flake8
