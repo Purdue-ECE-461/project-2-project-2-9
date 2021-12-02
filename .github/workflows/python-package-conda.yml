@@ -36,6 +36,7 @@ jobs:
         conda install -c conda-forge backports
         conda install -c conda-forge backports-datetime-fromisoformat
         conda install -c conda-forge pyjwt
+        pip install pyrebase
     - name: Lint with flake8
       run: |
         conda install flake8
