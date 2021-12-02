@@ -5,6 +5,8 @@ dependencies:
 # - anaconda
 - pip
 - flask
+- google
+- google.cloud
 - pip:
   - jwt
   - pyrebase
