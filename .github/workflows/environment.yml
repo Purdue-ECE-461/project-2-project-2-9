@@ -10,6 +10,7 @@ dependencies:
   - pyrebase
   - datetime
   - flask_restful
+  - google
   - google.cloud
 #   - flask
 #   # and for wheels
