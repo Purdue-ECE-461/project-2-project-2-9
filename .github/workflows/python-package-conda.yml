@@ -32,6 +32,7 @@ jobs:
         conda install -c conda-forge google-cloud-datastore
         conda install -c conda-forge python-dotenv
         conda install -c conda-forge git
+        conda install -c conda-forge gitpython
     - name: Lint with flake8
       run: |
         conda install flake8
