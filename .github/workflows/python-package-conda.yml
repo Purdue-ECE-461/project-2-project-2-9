@@ -35,6 +35,9 @@ jobs:
         conda install -c conda-forge gitpython
         conda install -c conda-forge backports
         conda install -c conda-forge backports-datetime-fromisoformat
+        conda install -c conda-forge flask
+        conda install -c conda-forge flask-restful
+        conda install -c conda-forge flask-jsonpify
         conda install -c conda-forge pyjwt
         pip install pyrebase
     - name: Lint with flake8
