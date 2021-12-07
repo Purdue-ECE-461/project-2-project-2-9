@@ -2,7 +2,6 @@ import unittest
 import main as tasks
 import json
 import ast
-import os
 
 import pyrebase
 from flask import Flask, jsonify
@@ -26,35 +25,34 @@ class TestSuite(unittest.TestCase):
     # ensure that the data responses and types are as expected.
     
     def test_packageRetrieve(self):
-        with os.path("/../LOGFILE.txt") as logfile:
-            with app.test_client() as client:
-                #Testing invalid credentials:
-                logfile.write("Running Bad Credential Test...")
-                bad_case = tasks.packageRetrieve(0)
-                status_code = bad_case._status_code
-                self.assertEqual(401, status_code)
-                response_code = ast.literal_eval(bad_case.response[0].decode("utf-8"))['code']
-                self.assertEqual(401, response_code)
-                response_message = ast.literal_eval(bad_case.response[0].decode("utf-8"))['message']
-                self.assertEqual('Error!  You do not have the permissions to view this item!', response_message)
+        with app.test_client() as client:
+            #Testing invalid credentials:
+            print("Running Bad Credential Test...")
+            bad_case = tasks.packageRetrieve(0)
+            status_code = bad_case._status_code
+            self.assertEqual(401, status_code)
+            response_code = ast.literal_eval(bad_case.response[0].decode("utf-8"))['code']
+            self.assertEqual(401, response_code)
+            response_message = ast.literal_eval(bad_case.response[0].decode("utf-8"))['message']
+            self.assertEqual('Error!  You do not have the permissions to view this item!', response_message)
 
-                yield client
+            yield client
 
-            with self.client as client:
-                #Test successful retrieval
-                print("Running Good Credential Test...")
-                successful = tasks.packageRetrieve(0)
-                print("-------------------------------------------------------")
-                print("*******************************************************")
-                print(f"The returned status code was: {successful.status_code}")
-                print("*******************************************************")
-                print("-------------------------------------------------------")
-                self.assertEqual(200, successful.status_code)
-                yield client
+        with self.client as client:
+            #Test successful retrieval
+            print("Running Good Credential Test...")
+            successful = tasks.packageRetrieve(0)
+            print("-------------------------------------------------------")
+            print("*******************************************************")
+            print(f"The returned status code was: {successful.status_code}")
+            print("*******************************************************")
+            print("-------------------------------------------------------")
+            self.assertEqual(200, successful.status_code)
+            yield client
 
-            # with app.test_client() as client:
-            #     #
-            #     yield client
+        # with app.test_client() as client:
+        #     #
+        #     yield client
 
         return
 
