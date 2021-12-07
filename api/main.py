@@ -9,8 +9,6 @@ from google.cloud import firestore
 
 import main_rate as rate
 
-from google.cloud import datastore as GCP
-
 config = {
   "apiKey": "AIzaSyAgpUJ9lfto0Qn3WX4T_BO6Hp458yWDB2o",
   "authDomain": "test-ae93d.firebaseapp.com",
@@ -40,11 +38,15 @@ def checkAuth():
     #Get & process authentification
     auth_token = request.headers.get('X-Authorization').split()[1]
 
-    #Check permissions:
-    #   1. Search db of Users with auth_token as filter:
-    auth_validation = GCP.Client().query(kind='User').addfilter('Token', '=', auth_token)
-    #   2. Get results & return if the query yields any Users
-    return len(list(auth_validation.fetch()))
+    try:
+        #Check permissions:
+        #   1. Search db of Users with auth_token as filter:
+        db = firebase.database()
+        auth_validation = db.child("User").order_by_child("Token").equal_to(auth_token)
+        #   2. Get results & return if the query yields any Users
+        return len(list(auth_validation.fetch()))
+    except Exception:
+        return 0
 
 """
 /package/<id> URLS:
@@ -56,24 +58,29 @@ def packageRetrieve(id):
     if(checkAuth() == 0): 
         return convertJSONFormat(401, {'code': 401, 'message': 'Error!  You do not have the permissions to view this item!'})
 
-    results = GCP.Client().query(kind='package').add_filter('ID', '=', id).fetch()
-    if(list(results) != []):
-        #Query database for package by ID
-        pack = results.get(results.key('package', id))
+    db = firebase.database()
+    
+    try:
+        results = db.child("package").order_by_child("ID").equal_to(id).get()
+        if(list(results) != []):
+            #Query for package by ID
+            pack = results.get(results.key('package', id))
 
-        api_response = {
-            'metadata': {
-                    'Name': pack['Name'],
-                    'Version': pack['Version'],
-                    'ID': pack['ID']
-                },
-                'data': {
-                    'Content': pack['Content'],
-                    'URL': pack['URL'],
-                    'JSProgram': pack['JSProgram']
-                }   
-            }
-        return convertJSONFormat(200, api_response)
+            api_response = {
+                'metadata': {
+                        'Name': pack['Name'],
+                        'Version': pack['Version'],
+                        'ID': pack['ID']
+                    },
+                    'data': {
+                        'Content': pack['Content'],
+                        'URL': pack['URL'],
+                        'JSProgram': pack['JSProgram']
+                    }   
+                }
+            return convertJSONFormat(200, api_response)
+    except Exception:
+        pass
 
     return convertJSONFormat(400, {'code': 400, 'message': 'Error! Something went wrong when processing your request!  Please ensure that your request was made properly!'})
 
@@ -94,33 +101,44 @@ def updatePackageVersion(id):
     except Exception:
         return convertJSONFormat(400, {'code': 400, 'message': 'Malformed request (e.g. no such package).'})
     
+    db = firebase.database()
+
     #Check that Metadata matches URL
-    if(id == req_body['ID']):
-        #Select from database to make sure package exists:
-        search =  GCP.Client().query(kind='package')
-        #Add filters for name and version (specified as a unique identifier pair)
-        search.add_filter('Name', '=', metadata['Name']).add_filter('Version', '=', metadata['Version'])
-        if(list(search.fetch()) != []): #Valid identifier pair:
-            #Hide most recent package:
-            former_version = search.fetch().get(search.fetch().key('package', id))
-            package_payload = GCP.Entity(former_version, exclude_from_indexes=['Content'])
+    try:
+        if(id == req_body['ID']):
+            #Select from database to make sure package exists:
+            search = db.child("package")
+            #Add filters for name...
+            search.order_by_child("Name").equal_to(metadata["Name"])
+            #...and version (specified as a unique identifier pair)
+            search.order_by_child("Version").equal_to(metadata["Version"])
 
-            #Update with newest version with metadata and data info:
-            package_payload.update({
-                'metadata':{
-                    'Name': metadata['Name'],
-                    'Version': metadata['Version'],
-                    'ID': metadata['ID']
-                },
-                'data':{
-                    'Content': data['Content'],
-                    'URL': data['URL'],
-                    'JSProgram': data['JSProgram']
+            if(list(search.get()) != []): #If this is a valid (existing) identifier pair:
+                #Get most recent package:
+                former_version = search
+                former_version.order_by_child("package").equal_to(id).get()
+                #Remove most recent package:
+                former_version.remove()
+
+                #Update with newest version with metadata and data info:
+                package_payload = {
+                    'metadata':{
+                        'Name': metadata['Name'],
+                        'Version': metadata['Version'],
+                        'ID': metadata['ID']
+                    },
+                    'data':{
+                        'Content': data['Content'],
+                        'URL': data['URL'],
+                        'JSProgram': data['JSProgram']
+                    }
                 }
-            })
 
-            GCP.put(package_payload)
-            return convertJSONFormat(200, {'code': 200, 'Payload': package_payload})
+                #Add to database:
+                db.child("package").set(package_payload)
+                return convertJSONFormat(200, {'code': 200, 'Payload': package_payload})
+    except Exception:
+        pass
 
     return convertJSONFormat(400, {'code' : 400, 'message': 'Malformed request (e.g. no such package).'})
 
@@ -130,13 +148,18 @@ def deletePackageVersion(id):
     
     if(checkAuth() == 0): 
         return convertJSONFormat(401, {'code': 401, 'message': 'Error!  You do not have the permissions to delete this item!'})
+    
+    db = firebase.database()
 
-    #Query packages to find package {id}
-    results = GCP.Client().query(kind='package').add_filter('ID', '=', id).fetch()
-    if(list(results) != []):
-        #Delete package by ID:
-        results.delete(GCP.key('package', id))
-        return convertJSONFormat(200, {'code': 200, 'message': 'Package is deleted.'})
+    try:
+        #Query packages to find package {id}
+        results = db.child("package").order_by_child("ID").equal_to(id)
+        if(list(results.get()) != []):
+            #Delete package by ID:
+            results.remove()
+            return convertJSONFormat(200, {'code': 200, 'message': 'Package is deleted.'})
+    except Exception:
+        pass
 
     return convertJSONFormat(400, {'code': 400, 'message':'No such package.'})
 
@@ -144,33 +167,36 @@ def deletePackageVersion(id):
 def ratePackage(id):
     request.get_data()
 
-    results = GCP.Client().query(kind='package').add_filter('ID', '=', id).fetch()
-
     if(checkAuth() == 0): 
         return convertJSONFormat(401, {'code': 401, 'message': 'Error!  You do not have the permissions to view this item!'})
 
-    results = GCP.Client().query(kind='package').add_filter('ID', '=', id).fetch()
+    db = firebase.database()
 
-    if(list(results) != []):
-        #Query database for package by ID
-        pack = results.get(results.key('package', id))
+    results = db.child("package").order_by_child("ID").equal_to(id)
 
-        try:
-            netScore, rampUpScore, correctnessScore, busFactorScore, responsiveMaintainerScore, licenseScore = rate.call_main(pack['URL'])
+    try:
+        if(list(results.get()) != []):
+            #Query database for package by ID
+            pack = results.get()
 
-            api_response = {{
-            'BusFactor': busFactorScore,
-            'Correctness': correctnessScore,
-            'RampUp': rampUpScore,
-            'ResponsiveMaintainer': responsiveMaintainerScore,
-            'LicenseScore': licenseScore,
-            'GoodPinningPractice': 0 #TODO:!!!
-            }}
+            try:
+                netScore, rampUpScore, correctnessScore, busFactorScore, responsiveMaintainerScore, licenseScore = rate.call_main(pack['URL'])
+
+                api_response = {{
+                'BusFactor': busFactorScore,
+                'Correctness': correctnessScore,
+                'RampUp': rampUpScore,
+                'ResponsiveMaintainer': responsiveMaintainerScore,
+                'LicenseScore': licenseScore,
+                'GoodPinningPractice': netScore
+                }}
 
 
-        except Exception:
-            return convertJSONFormat(500, {'code': 500, 'message': "The package rating system choked on at least one of the metrics."})
-        return convertJSONFormat(200, api_response)
+            except Exception:
+                return convertJSONFormat(500, {'code': 500, 'message': "The package rating system choked on at least one of the metrics."})
+            return convertJSONFormat(200, api_response)
+    except Exception:
+        pass
 
     return convertJSONFormat(400, {'code': 400, 'message': 'No such package.'})
     
@@ -184,12 +210,12 @@ def resetRegistry():
     if(checkAuth() == 0): 
         return convertJSONFormat(401, {'code': 401, 'message': 'You do not have permission to reset the registry.'})
 
+    db = firebase.database()
     #Query for all packages:
-    packages = GCP.Client().query(kind='package')
+    packages = db.child("package")
 
     try:
-        for i in packages:
-            GCP.delete(i)
+        packages.remove
         return convertJSONFormat(200, {'code': 200, 'message': 'Registry is reset.'})
     except Exception:
         return convertJSONFormat(401, {'code': 401, 'message': 'Something went wrong when trying to reset the registry!'})
@@ -201,18 +227,21 @@ def resetRegistry():
 def getPackages():
     request.get_data()
 
-    offset = -1
+    offset = 1
     try:
         offset = request.args.get('offset')
     except Exception:
         pass
-    
+
+    offset *= 10
+
     if(checkAuth() == 0): 
         return convertJSONFormat(401, {'code': 401, 'message': 'You do not have permission to view the registry.'})
 
     try:
+        db = firebase.database()
         #Query for all packages:
-        packages = GCP.Client().query(kind='package')
+        packages = db.child("package").get()
 
         response = []
 
@@ -247,15 +276,19 @@ def createPackage():
         data = req_body['data']
     except Exception:
         return convertJSONFormat(400, {'code': 400, 'message': 'Malformed request.'})
-
-    #Check if package exists:
-    if list(GCP.Client().query(kind='package').add_filter('ID', '=', metadata['id']).fetch()):
-        return convertJSONFormat(403, {'code': 403, 'message': 'Package exists already.'})
-
-    data = {'Name': metadata['Name'], 'Version': metadata['Version'], 'ID': metadata['ID']}
-    GCP.put(data)
     
-    return convertJSONFormat(201, data)
+    db = firebase.database()
+    try:
+        #Check if package exists:
+        if list(db.child("package").order_by_child("ID").equal_to(metadata["id"].get())):
+            return convertJSONFormat(403, {'code': 403, 'message': 'Package exists already.'})
+
+        data = {'Name': metadata['Name'], 'Version': metadata['Version'], 'ID': metadata['ID']}
+        db.set(data)
+        
+        return convertJSONFormat(201, data)
+    except Exception:
+        return convertJSONFormat(400, {'code': 400, 'message': 'Something went wrong when trying to add a package.'})
 
 """
 /package/byName/<name> URLS:
@@ -267,13 +300,15 @@ def getPackageByName(name):
     if(checkAuth() == 0): 
         return convertJSONFormat(401, {'code': 401, 'message': 'You do not have permission to view the package.'})
 
-    #Query for all packages:
-    packages = GCP.Client().query(kind='package').add_filter('Name','=',name).fetch()
-
-    if(list(packages)==[]):
-        return convertJSONFormat(400, {'code': 400, 'message': 'No such package.'})
+    db = firebase.database()
 
     try:
+        #Query for all packages:
+        packages = db.child("package").order_by_child("Name").equal_to(name).get()
+
+        if(list(packages)==[]):
+            return convertJSONFormat(400, {'code': 400, 'message': 'No such package.'})
+
         data = { 
             'id': packages['id'],
             'name': name,
@@ -291,14 +326,19 @@ def deletePackageVersions(name):
     if(checkAuth() == 0): 
         return convertJSONFormat(401, {'code': 401, 'message': 'You do not have permission to modify the package.'})
 
-    #Query for all packages:
-    packages = GCP.Client().query(kind='package').add_filter('Name','=',name).fetch()
+    db = firebase.database()
 
-    if(list(packages)==[]):
+    #Query for all packages:
+    try:
+        packages = db.child("package").order_by_child("Name").equal_to(name)
+    except Exception:
+        return convertJSONFormat(400, {'code': 400, 'message': 'Error in retrieving package for deletion.'})
+
+    if(list(packages.get())==[]):
         return convertJSONFormat(400, {'code': 400, 'message': 'No such package.'})
 
     try:
-        packages.delete(GCP.key('package', packages['id']))
+        packages.remove()
         return convertJSONFormat(200, {'code': 200, 'message': 'Package is deleted.'})
     except Exception:
         return convertJSONFormat(400, {'code': 400, 'message': 'Error in deleting package.'})
