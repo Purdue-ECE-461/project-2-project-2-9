@@ -25,8 +25,8 @@ class TestSuite(unittest.TestCase):
     # ensure that the data responses and types are as expected.
     
     def test_packageRetrieve(self):
-        #Testing invalid credentials:
         with app.test_client() as client:
+            #Testing invalid credentials:
             bad_case = tasks.packageRetrieve(0)
             status_code = bad_case._status_code
             self.assertEqual(401, status_code)
@@ -36,6 +36,21 @@ class TestSuite(unittest.TestCase):
             self.assertEqual('Error!  You do not have the permissions to view this item!', response_message)
 
             yield client
+
+        with self.client as client:
+            #Test successful retrieval
+            successful = tasks.packageRetrieve(0)
+            print("-------------------------------------------------------")
+            print("*******************************************************")
+            print(f"The returned status code was: {successful.status_code}")
+            print("*******************************************************")
+            print("-------------------------------------------------------")
+            self.assertEqual(200, successful.status_code)
+            yield client
+
+        # with app.test_client() as client:
+        #     #
+        #     yield client
 
         return
 
