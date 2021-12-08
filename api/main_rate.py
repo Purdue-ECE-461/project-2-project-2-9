@@ -81,7 +81,34 @@ def call_main(url):
     load_dotenv()
     LOG_LEVEL = {'0': logging.CRITICAL, '1': logging.INFO, '2': logging.DEBUG}
     logging.basicConfig(filename=os.getenv('LOG_FILE'), level=LOG_LEVEL[os.getenv('LOG_LEVEL')])
-    main()
+    #main()
+    repoMetricsDict = {}
+    repoList = []
+    
+    url = url.strip('\n')
+
+    # Handle the URL, check formatting and get github repo if it's an npmjs link.
+    githubRepo, isValid = handleURL(url)
+
+        # If the repo is valid, run the metrics to get scores.
+        # If the repo is not valid, make a metrics object but dont get scores. Default is -1 for all scores.
+    if isValid:
+        repoMetrics = metrics.Metrics(githubRepo)
+        repoMetrics.runMetrics()
+    else:
+        repoMetrics = metrics.Metrics(url)
+
+    logging.info(repoMetrics)
+    repoList.append((url, repoMetrics.netScore))
+    repoMetricsDict[url] = repoMetrics
+
+    print('URL NET_SCORE RAMP_UP_SCORE CORRECTNESS_SCORE BUS_FACTOR_SCORE RESPONSIVE_MAINTAINER_SCORE LICENSE_SCORE')
+    for repoUrl, _ in reversed(sorted(repoList, key=lambda x: x[1])):
+        repoMetrics = repoMetricsDict[repoUrl]
+        print(f"{repoUrl} {repoMetrics.netScore} {repoMetrics.rampUpScore} {repoMetrics.correctnessScore} {repoMetrics.busFactorScore} {repoMetrics.responsiveMaintainerScore} {repoMetrics.licenseScore}")
+
+    
+    
 
 # if __name__ == "__main__":
 #     load_dotenv()
