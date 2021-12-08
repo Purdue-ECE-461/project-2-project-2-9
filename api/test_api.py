@@ -56,125 +56,125 @@ class TestSuite(unittest.TestCase):
 
         return
 
-    # def test_updatePackageVersion(self):
-    #     #Testing invalid credentials:
-    #     with app.test_client() as client:
-    #         bad_case = tasks.updatePackageVersion(0)
-    #         status_code = bad_case._status_code
-    #         self.assertEqual(401, status_code)
-    #         response_code = ast.literal_eval(bad_case.response[0].decode("utf-8"))['code']
-    #         self.assertEqual(401, response_code)
-    #         response_message = ast.literal_eval(bad_case.response[0].decode("utf-8"))['message']
-    #         self.assertEqual('Error!  You do not have the permissions to view this item!', response_message)
+    def test_updatePackageVersion(self):
+        #Testing invalid credentials:
+        with app.test_client() as client:
+            bad_case = tasks.updatePackageVersion(0)
+            status_code = bad_case._status_code
+            self.assertEqual(401, status_code)
+            response_code = ast.literal_eval(bad_case.response[0].decode("utf-8"))['code']
+            self.assertEqual(401, response_code)
+            response_message = ast.literal_eval(bad_case.response[0].decode("utf-8"))['message']
+            self.assertEqual('Error!  You do not have the permissions to view this item!', response_message)
             
-    #         yield client
+            yield client
 
-    #     return
+        return
     
-    # def test_deletePackageVersion(self):
-    #     #Testing invalid credentials:
-    #     with app.test_client() as client:
-    #         bad_case = tasks.deletePackageVersion(0)
-    #         status_code = bad_case._status_code
-    #         self.assertEqual(401, status_code)
-    #         response_code = ast.literal_eval(bad_case.response[0].decode("utf-8"))['code']
-    #         self.assertEqual(401, response_code)
-    #         response_message = ast.literal_eval(bad_case.response[0].decode("utf-8"))['message']
-    #         self.assertEqual('Error!  You do not have the permissions to view this item!', response_message)
+    def test_deletePackageVersion(self):
+        #Testing invalid credentials:
+        with app.test_client() as client:
+            bad_case = tasks.deletePackageVersion(0)
+            status_code = bad_case._status_code
+            self.assertEqual(401, status_code)
+            response_code = ast.literal_eval(bad_case.response[0].decode("utf-8"))['code']
+            self.assertEqual(401, response_code)
+            response_message = ast.literal_eval(bad_case.response[0].decode("utf-8"))['message']
+            self.assertEqual('Error!  You do not have the permissions to view this item!', response_message)
             
-    #         yield client
+            yield client
 
-    #     return
+        return
 
-    # def test_ratePackage(self):
-    #     #Testing invalid credentials:
-    #     with app.test_client() as client:
-    #         bad_case = tasks.ratePackage(0)
-    #         status_code = bad_case._status_code
-    #         self.assertEqual(401, status_code)
-    #         response_code = ast.literal_eval(bad_case.response[0].decode("utf-8"))['code']
-    #         self.assertEqual(401, response_code)
-    #         response_message = ast.literal_eval(bad_case.response[0].decode("utf-8"))['message']
-    #         self.assertEqual('Error!  You do not have the permissions to view this item!', response_message)
+    def test_ratePackage(self):
+        #Testing invalid credentials:
+        with app.test_client() as client:
+            bad_case = tasks.ratePackage(0)
+            status_code = bad_case._status_code
+            self.assertEqual(401, status_code)
+            response_code = ast.literal_eval(bad_case.response[0].decode("utf-8"))['code']
+            self.assertEqual(401, response_code)
+            response_message = ast.literal_eval(bad_case.response[0].decode("utf-8"))['message']
+            self.assertEqual('Error!  You do not have the permissions to view this item!', response_message)
             
-    #         yield client
+            yield client
 
-    #     return
+        return
 
-    # def test_resetRegistry(self):
-    #     #Testing invalid credentials:
-    #     with app.test_client() as client:
-    #         bad_case = tasks.resetRegistry()
-    #         status_code = bad_case._status_code
-    #         self.assertEqual(401, status_code)
-    #         response_code = ast.literal_eval(bad_case.response[0].decode("utf-8"))['code']
-    #         self.assertEqual(401, response_code)
-    #         response_message = ast.literal_eval(bad_case.response[0].decode("utf-8"))['message']
-    #         self.assertEqual('You do not have permission to reset the registry.', response_message)
+    def test_resetRegistry(self):
+        #Testing invalid credentials:
+        with app.test_client() as client:
+            bad_case = tasks.resetRegistry()
+            status_code = bad_case._status_code
+            self.assertEqual(401, status_code)
+            response_code = ast.literal_eval(bad_case.response[0].decode("utf-8"))['code']
+            self.assertEqual(401, response_code)
+            response_message = ast.literal_eval(bad_case.response[0].decode("utf-8"))['message']
+            self.assertEqual('You do not have permission to reset the registry.', response_message)
             
-    #         yield client
+            yield client
 
-    #     return
+        return
 
-    # def test_getPackages(self):
-    #     #Testing invalid credentials:
-    #     with app.test_client() as client:
-    #         bad_case = tasks.getPackages()
-    #         status_code = bad_case._status_code
-    #         self.assertEqual(401, status_code)
-    #         response_code = ast.literal_eval(bad_case.response[0].decode("utf-8"))['code']
-    #         self.assertEqual(401, response_code)
-    #         response_message = ast.literal_eval(bad_case.response[0].decode("utf-8"))['message']
-    #         self.assertEqual('You do not have permission to view the registry.', response_message)
+    def test_getPackages(self):
+        #Testing invalid credentials:
+        with app.test_client() as client:
+            bad_case = tasks.getPackages()
+            status_code = bad_case._status_code
+            self.assertEqual(401, status_code)
+            response_code = ast.literal_eval(bad_case.response[0].decode("utf-8"))['code']
+            self.assertEqual(401, response_code)
+            response_message = ast.literal_eval(bad_case.response[0].decode("utf-8"))['message']
+            self.assertEqual('You do not have permission to view the registry.', response_message)
             
-    #         yield client
+            yield client
 
-    #     return
+        return
 
-    # def test_createPackage(self):
-    #     #Testing invalid credentials:
-    #     with app.test_client() as client:
-    #         bad_case = tasks.createPackage()
-    #         status_code = bad_case._status_code
-    #         self.assertEqual(401, status_code)
-    #         response_code = ast.literal_eval(bad_case.response[0].decode("utf-8"))['code']
-    #         self.assertEqual(401, response_code)
-    #         response_message = ast.literal_eval(bad_case.response[0].decode("utf-8"))['message']
-    #         self.assertEqual('You do not have permission to add to the registry.', response_message)
+    def test_createPackage(self):
+        #Testing invalid credentials:
+        with app.test_client() as client:
+            bad_case = tasks.createPackage()
+            status_code = bad_case._status_code
+            self.assertEqual(401, status_code)
+            response_code = ast.literal_eval(bad_case.response[0].decode("utf-8"))['code']
+            self.assertEqual(401, response_code)
+            response_message = ast.literal_eval(bad_case.response[0].decode("utf-8"))['message']
+            self.assertEqual('You do not have permission to add to the registry.', response_message)
             
-    #         yield client
+            yield client
 
-    #     return
+        return
     
-    # def test_getPackageByName(self):
-    #     #Testing invalid credentials:
-    #     with app.test_client() as client:
-    #         bad_case = tasks.getPackageByName("test")
-    #         status_code = bad_case._status_code
-    #         self.assertEqual(401, status_code)
-    #         response_code = ast.literal_eval(bad_case.response[0].decode("utf-8"))['code']
-    #         self.assertEqual(401, response_code)
-    #         response_message = ast.literal_eval(bad_case.response[0].decode("utf-8"))['message']
-    #         self.assertEqual('You do not have permission to view the package.', response_message)
+    def test_getPackageByName(self):
+        #Testing invalid credentials:
+        with app.test_client() as client:
+            bad_case = tasks.getPackageByName("test")
+            status_code = bad_case._status_code
+            self.assertEqual(401, status_code)
+            response_code = ast.literal_eval(bad_case.response[0].decode("utf-8"))['code']
+            self.assertEqual(401, response_code)
+            response_message = ast.literal_eval(bad_case.response[0].decode("utf-8"))['message']
+            self.assertEqual('You do not have permission to view the package.', response_message)
             
-    #         yield client
+            yield client
 
-    #     return
+        return
     
-    # def test_deletePackageVersions(self):
-    #     #Testing invalid credentials:
-    #     with app.test_client() as client:
-    #         bad_case = tasks.deletePackageVersions("test")
-    #         status_code = bad_case._status_code
-    #         self.assertEqual(401, status_code)
-    #         response_code = ast.literal_eval(bad_case.response[0].decode("utf-8"))['code']
-    #         self.assertEqual(401, response_code)
-    #         response_message = ast.literal_eval(bad_case.response[0].decode("utf-8"))['message']
-    #         self.assertEqual('You do not have permission to modify the package.', response_message)
+    def test_deletePackageVersions(self):
+        #Testing invalid credentials:
+        with app.test_client() as client:
+            bad_case = tasks.deletePackageVersions("test")
+            status_code = bad_case._status_code
+            self.assertEqual(401, status_code)
+            response_code = ast.literal_eval(bad_case.response[0].decode("utf-8"))['code']
+            self.assertEqual(401, response_code)
+            response_message = ast.literal_eval(bad_case.response[0].decode("utf-8"))['message']
+            self.assertEqual('You do not have permission to modify the package.', response_message)
             
-    #         yield client
+            yield client
 
-    #     return
+        return
 
 
     
