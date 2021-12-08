@@ -20,6 +20,7 @@ class Metrics:
         self.busFactorScore = -1
         self.responsiveMaintainerScore = -1
         self.licenseScore = -1
+        self.dependencyScore = -1
 
     def __repr__(self):
         reprString =  f"""
@@ -32,6 +33,7 @@ class Metrics:
         Repo Bus Factor Score: {self.busFactorScore} \n \
         Repo Responsive Maintainer Score: {self.responsiveMaintainerScore} \n \
         Repo License Score: {self.licenseScore} \n \
+        Repo Dependency Score: {self.dependencyScore} \n \
         """
 
         return reprString
@@ -220,6 +222,46 @@ class Metrics:
             logging.info("(setLicense) API response doesn't have the necessary fields for metric calculation!")
 
         self.licenseScore = 0
+    
+    def setDependencyScore(self) -> None:
+        issuesResponse = handler.getDependencies(self.moduleOwner, self.moduleName)
+        logging.debug(f"ResponsiveMaintainer(issues) response for {self.moduleName} is empty: {len(issuesResponse) == 0}")
+        totalDependencies = len(issuesResponse)
+        pinnedDependencies = 0;
+        nonPinnedDependencies = 0;
+
+        try:
+            if  totalDependencies > 0:
+                for dependency in issuesResponse:
+                    first_dot = issuesResponse[dependency].find(".")
+                    second_dot = issuesResponse[dependency].rfind(".")
+                    firstChar = len(issuesResponse[dependency])
+                    major = issuesResponse[dependency][0:first_dot]
+                    minor = issuesResponse[dependency][first_dot + 1:second_dot]
+                    patch = issuesResponse[dependency][second_dot + 1:firstChar]
+
+                    if major == '0' and minor == '0' and patch:
+                        pinnedDependencies += 1
+                    elif bool(re.match("\~[0-9]+", major)) and bool(re.match("[0-9]+", minor)):
+                        pinnedDependencies += 1
+                    elif bool(re.match("\=[0-9]+", major)) and  bool(re.match("[0-9]+", minor)):
+                        pinnedDependencies += 1
+                    elif bool(re.match("[0-9]+", major)) and bool(re.match("[0-9]+", minor)):
+                        pinnedDependencies += 1
+                    elif bool(re.match("\^[0-9]+", major)) and  bool(re.match("[0-9]+", minor)):
+                        nonPinnedDependencies += 1
+                    elif bool(re.match("\<\=*[0-9]+", major)) and  bool(re.match("[0-9]+", minor)):
+                        nonPinnedDependencies += 1
+                    elif bool(re.match("\>\=*[0-9]+", major)) and  bool(re.match("[0-9]+", minor)):
+                        nonPinnedDependencies += 1
+                    
+
+                self.dependencyScore = pinnedDependencies / totalDependencies
+            else:
+                self.dependencyScore = 1.0
+        except TypeError:
+            logging.info("(setResponsiveMaintainer) API response doesn't have the necessary fields for metric calculation!")
+        
 
     def runMetrics(self) -> None:
         self.setRampUp()
@@ -227,4 +269,5 @@ class Metrics:
         self.setBusFactor()
         self.setResponsiveMaintainer()
         self.setLicense()
+        self.setDependencyScore()
         self.setNet()
