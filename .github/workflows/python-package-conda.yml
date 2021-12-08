@@ -65,6 +65,11 @@ jobs:
         project_id: ${{ secrets.GCP_PROJECT_ID }}
         credentials: ${{ secrets.GCP_SA_KEY }}
 
-    - name: Curl Test
+    
+    - name: Curl Test 1
       run: curl "${{ steps.deploy.outputs.url }}"/packages
+    - name: Curl Test 2
+      run: curl "${{ steps.deploy.outputs.url }}"/package
+    - name: Curl Test 3
       run: curl "${{ steps.deploy.outputs.url }}"/reset
+      
