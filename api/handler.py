@@ -1,3 +1,4 @@
+import json
 import requests
 import datetime as dt
 import logging
@@ -80,3 +81,19 @@ def getGithubUrl(packageName: str) -> str:
         logging.debug(f"NPM-JS API returned empty response for {packageName}!")
         return None
     return response['collected']['metadata']['links']['repository']
+
+def getDependencies(owner: str, module: str) -> dict:
+    dependencies={}
+    # baseURL = baseURL + "/contents/package.json"
+    # response = requests.get(baseURL, headers=headers)
+    # data = response.json()
+    data = requests.get(url='https://api.github.com/repos/' + owner + '/' + module + '/contents/package.json',  headers=header).json()
+    if 'content' in data:
+        base64_message = base64.b64decode(data['content'])
+        output = base64_message.decode()
+        output = json.loads(output)
+        dependencies = output['dependencies']
+        # print(type(output))
+    else:
+        output = {}
+    return dependencies
