@@ -67,5 +67,5 @@ jobs:
 
     - name: Curl Test
       run: curl "${{ steps.deploy.outputs.url }}"/packages
-      run: curl "${{ steps.deploy.outputs.url }}"/package/0
+      run: curl "${{ steps.deploy.outputs.url }}"/package
       run: curl "${{ steps.deploy.outputs.url }}"/reset
