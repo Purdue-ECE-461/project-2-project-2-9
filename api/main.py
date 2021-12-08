@@ -178,9 +178,8 @@ def ratePackage(id):
         if(list(results.get()) != []):
             #Query database for package by ID
             pack = results.get()
-
             try:
-                netScore, rampUpScore, correctnessScore, busFactorScore, responsiveMaintainerScore, licenseScore = rate.call_main(pack['URL'])
+                netScore, rampUpScore, correctnessScore, busFactorScore, responsiveMaintainerScore, licenseScore, dependencyScore = rate.call_main(pack['URL'])
 
                 api_response = {{
                 'BusFactor': busFactorScore,
@@ -188,7 +187,8 @@ def ratePackage(id):
                 'RampUp': rampUpScore,
                 'ResponsiveMaintainer': responsiveMaintainerScore,
                 'LicenseScore': licenseScore,
-                'GoodPinningPractice': netScore
+                'GoodPinningPractice': dependencyScore
+		'NetScore': netScore
                 }}
 
 
