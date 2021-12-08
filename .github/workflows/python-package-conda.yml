@@ -72,4 +72,6 @@ jobs:
       run: curl "${{ steps.deploy.outputs.url }}"/package
     - name: Curl Test 3
       run: curl "${{ steps.deploy.outputs.url }}"/reset
+    - name: Curl Test 4
+      run: curl --location --request PUT "${{ steps.deploy.outputs.url }}/authenticate" \ --data-raw '{"User": {"name": "ece461defaultadminuser", "isAdmin": true }, "Secret": { "password": "correcthorsebatterystaple123(!__+@**(A"}}'
       
