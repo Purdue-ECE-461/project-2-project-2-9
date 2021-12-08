@@ -1,10 +1,10 @@
-requests==2.22
-requests-toolbelt==0.7.0
+requests
+requests-toolbelt
 google-cloud-datastore==2.4.0
 Flask==1.1.2
 Flask-RESTful==0.3.8
 PyJWT==1.4.0
-Pyrebase==3.0.27
+Pyrebase
 google-cloud==0.34.0
 google-cloud-firestore==1.9.0
 backports-datetime-fromisoformat==1.0.0
