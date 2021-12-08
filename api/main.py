@@ -188,7 +188,6 @@ def ratePackage(id):
                 'ResponsiveMaintainer': responsiveMaintainerScore,
                 'LicenseScore': licenseScore,
                 'GoodPinningPractice': dependencyScore
-		'NetScore': netScore
                 }}
 
 
