@@ -448,30 +448,41 @@ def getPackageByName(name):
         return convertJSONFormat(400, {'code': 400, 'message': 'Unknown Error!  Please ensure that your request was made properly!'})
     
 
-@app.route("/package/byName/<name>", methods=['DEL'])
+@app.route("/package/byName/<name>", methods=['DELETE'])
 def deletePackageVersions(name):
     try:
+        checkValues = []
+        checkValues = checkAuth()
         request.get_data()
+        if checkValues:
+            if checkValues[0] == 0:
+                return convertJSONFormat(401, {'code': 401, 'message': 'You do not have permission to modify the package.'})
+        else:
+            return convertJSONFormat(400, {'code': 400, 'message': 'Unknown Error!  Please ensure that your request was made properly!'})
         
-        if(checkAuth() == 0): 
-            return convertJSONFormat(401, {'code': 401, 'message': 'You do not have permission to modify the package.'})
+        # if(checkAuth() == 0): 
+        #     return convertJSONFormat(401, {'code': 401, 'message': 'You do not have permission '})
 
         db = firebase.database()
 
-        #Query for all packages:
+        #Try Deleting the package:
         try:
-            packages = db.child("package").order_by_child("Name").equal_to(name)
+            for packageKey in db.child("Packages").get().val():
+                # print(packageKey)
+                if packageKey['PackageMetadata']['Name'] == name:
+                    packageKey.remove()
+                    return convertJSONFormat(200, {'code': 200, 'message': 'Package is deleted.'})
         except Exception:
             return convertJSONFormat(400, {'code': 400, 'message': 'Error in retrieving package for deletion.'})
 
-        if(list(packages.get())==[]):
-            return convertJSONFormat(400, {'code': 400, 'message': 'No such package.'})
+        # if(list(packages.get())==[]):
+        #     return convertJSONFormat(400, {'code': 400, 'message': 'No such package.'})
 
-        try:
-            packages.remove()
-            return convertJSONFormat(200, {'code': 200, 'message': 'Package is deleted.'})
-        except Exception:
-            return convertJSONFormat(400, {'code': 400, 'message': 'Error in deleting package.'})
+        # try:
+        #     packages.remove()
+        #     return convertJSONFormat(200, {'code': 200, 'message': 'Package is deleted.'})
+        # except Exception:
+        #     return convertJSONFormat(400, {'code': 400, 'message': 'Error in deleting package.'})
     except Exception:
         return convertJSONFormat(400, {'code': 400, 'message': 'Unknown Error!  Please ensure that your request was made properly!'})
 
