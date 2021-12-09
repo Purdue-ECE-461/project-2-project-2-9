@@ -222,7 +222,7 @@ def ratePackage(id):
 """
 /reset URL:
 """
-@app.route("/reset", methods=['DEL'])
+@app.route("/reset", methods=['DELETE'])
 def resetRegistry():
     try:
         request.get_data()
