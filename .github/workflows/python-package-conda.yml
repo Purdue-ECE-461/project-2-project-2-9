@@ -75,3 +75,9 @@ jobs:
       run: curl "${{ steps.deploy.outputs.url }}"/reset
     - name: Curl Test 4
       run: curl --location --request PUT 'https://lexical-botany-331616.uc.r.appspot.com/authenticate' --data-raw '{"User":{"name":"team9","isAdmin":true},"Secret":{"password":"correcthorsebatterystaple123(!__+@**(A"}}'
+    - name: Curl Test 5
+      run: curl -X POST "${{ steps.deploy.outputs.url }}"/packages
+    - name: Curl Test 6
+      run: curl -X POST "${{ steps.deploy.outputs.url }}"/package
+    - name: Curl Test 7
+      run: curl -X DEL "${{ steps.deploy.outputs.url }}"/reset
