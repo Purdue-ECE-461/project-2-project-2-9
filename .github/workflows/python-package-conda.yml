@@ -65,8 +65,12 @@ jobs:
         project_id: ${{ secrets.GCP_PROJECT_ID }}
         credentials: ${{ secrets.GCP_SA_KEY }}
 
-    - name: Curl Test
-      run: curl "${{ steps.deploy.outputs.url }}/packages/"
     
-    - name: Wget Test
-      run: wget "${{ steps.deploy.outputs.url }}/packages/"
+    - name: Curl Test 1
+      run: curl "${{ steps.deploy.outputs.url }}"/packages
+    - name: Curl Test 2
+      run: curl "${{ steps.deploy.outputs.url }}"/package
+    - name: Curl Test 3
+      run: curl "${{ steps.deploy.outputs.url }}"/reset
+    - name: Curl Test 4
+      run: curl --location --request PUT '${{ steps.deploy.outputs.url }}/authenticate' --data-raw '{"User": {"name": "team9","isAdmin": true},"Secret": {"password": "correcthorsebatterystaple123(!__+@**(A"}}'

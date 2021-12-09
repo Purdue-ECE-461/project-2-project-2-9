@@ -9,11 +9,18 @@ from google.cloud import firestore
 
 import main_rate as rate
 
+# config = {
+#   "apiKey": "AIzaSyAgpUJ9lfto0Qn3WX4T_BO6Hp458yWDB2o",
+#   "authDomain": "test-ae93d.firebaseapp.com",
+#   "databaseURL": "https://test-ae93d-default-rtdb.firebaseio.com/",
+#   "storageBucket": "test-ae93d.appspot.com"
+# }
+
 config = {
-  "apiKey": "AIzaSyAgpUJ9lfto0Qn3WX4T_BO6Hp458yWDB2o",
-  "authDomain": "test-ae93d.firebaseapp.com",
-  "databaseURL": "https://test-ae93d-default-rtdb.firebaseio.com/",
-  "storageBucket": "test-ae93d.appspot.com"
+  "apiKey": ${{ secrets.API_KEY }},
+  "authDomain": "lexical-botany-331616.firebaseapp.com",
+  "databaseURL": "https://lexical-botany-331616-default-rtdb.firebaseio.com/",
+  "storageBucket": "lexical-botany-331616.appspot.com"
 }
 
 firebase = pyrebase.initialize_app(config)
@@ -184,6 +191,7 @@ def ratePackage(id):
 
         results = db.child("package").order_by_child("ID").equal_to(id)
 
+<<<<<<< HEAD
         try:
             if(list(results.get()) != []):
                 #Query database for package by ID
@@ -207,6 +215,30 @@ def ratePackage(id):
                 return convertJSONFormat(200, api_response)
         except Exception:
             pass
+=======
+    try:
+        if(list(results.get()) != []):
+            #Query database for package by ID
+            pack = results.get()
+            try:
+                netScore, rampUpScore, correctnessScore, busFactorScore, responsiveMaintainerScore, licenseScore, dependencyScore = rate.call_main(pack['URL'])
+
+                api_response = {{
+                'BusFactor': busFactorScore,
+                'Correctness': correctnessScore,
+                'RampUp': rampUpScore,
+                'ResponsiveMaintainer': responsiveMaintainerScore,
+                'LicenseScore': licenseScore,
+                'GoodPinningPractice': dependencyScore
+                }}
+
+
+            except Exception:
+                return convertJSONFormat(500, {'code': 500, 'message': "The package rating system choked on at least one of the metrics."})
+            return convertJSONFormat(200, api_response)
+    except Exception:
+        pass
+>>>>>>> e39e5c989b76d7002ac07c198d0cc4a828e0184d
 
         return convertJSONFormat(400, {'code': 400, 'message': 'No such package.'})
     except Exception:

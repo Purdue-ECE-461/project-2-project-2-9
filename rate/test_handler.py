@@ -14,6 +14,16 @@ class TestHandler(unittest.TestCase):
         metricObj.setRampUp()
         self.assertEqual(metricObj.rampUpScore, 1.0)
 
+    def test_dependencyScore_high(self):
+        metricObj = Metrics("https://github.com/expressjs/express")
+        metricObj.setDependencyScore()
+        self.assertGreater(metricObj.dependencyScore,0.8)
+
+    def test_dependencyScore_low(self):
+        metricObj = Metrics("https://github.com/cloudinary/cloudinary_npm")
+        metricObj.setDependencyScore()
+        self.assertLess(metricObj.dependencyScore,0.5)
+    
     def test_rampUpScore_low(self):
         metricObj = Metrics("https://github.com/kkemple/memoize-async")
         metricObj.setRampUp()

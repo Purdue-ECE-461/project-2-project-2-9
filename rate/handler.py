@@ -1,3 +1,4 @@
+import json
 import requests
 import datetime as dt
 import logging
@@ -15,6 +16,7 @@ header = {
 def getRepoInfo(owner: str, module: str) -> dict:
     response = requests.get(url='https://api.github.com/repos/' + owner + '/' + module , headers=header).json()
     if len(response) == 0:
+        logging.info(f"getRepoInfo response for {module} is empty!")
         logging.debug(f"getRepoInfo response for {module} is empty!")
     return response
 
@@ -22,7 +24,8 @@ def getRepoInfo(owner: str, module: str) -> dict:
 def getCommunityProfile(owner: str, module: str) -> dict:
     response = requests.get(url='https://api.github.com/repos/' + owner + '/' + module + '/community/profile', headers=header).json()
     if len(response) == 0:
-        logging.debug(f"getCommunityProfile response for {module} is empty!")
+        logging.info(f"getCommunityProfile response for {module} is empty!")
+        logging.debug(f"getCommunityProfile response for {module} is empty! Please check your input URl or authentication tokens")
     return response
 
 
@@ -34,6 +37,7 @@ def getCommits(owner: str, module: str) -> dict:
     }
     response = requests.get(url='https://api.github.com/repos/' + owner + '/' + module + '/commits', headers=header, params=param).json()
     if len(response) == 0:
+        logging.info(f"getCommits response for {module} is empty!")
         logging.debug(f"getCommits response for {module} is empty!")
     return response
 
@@ -45,6 +49,7 @@ def getIssues(owner: str, module: str) -> dict:
     }
     response = requests.get(url='https://api.github.com/repos/' + owner + '/' + module + '/issues', headers=header, params=param).json()
     if len(response) == 0:
+        logging.info(f"getIssues response for {module} is empty!")
         logging.debug(f"getIssues response for {module} is empty!")
     return response
 
@@ -80,3 +85,20 @@ def getGithubUrl(packageName: str) -> str:
         logging.debug(f"NPM-JS API returned empty response for {packageName}!")
         return None
     return response['collected']['metadata']['links']['repository']
+
+def getDependencies(owner: str, module: str) -> dict:
+    dependencies={}
+    # baseURL = baseURL + "/contents/package.json"
+    # response = requests.get(baseURL, headers=headers)
+    # data = response.json()
+    data = requests.get(url='https://api.github.com/repos/' + owner + '/' + module + '/contents/package.json',  headers=header).json()
+    if 'content' in data:
+        base64_message = base64.b64decode(data['content'])
+        output = base64_message.decode()
+        output = json.loads(output)
+        dependencies = output['dependencies']
+        # print(type(output))
+    else:
+        output = {}
+
+    return dependencies
