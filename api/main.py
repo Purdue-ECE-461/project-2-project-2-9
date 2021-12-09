@@ -117,11 +117,12 @@ def packageRetrieve(id):
                     # print("Reached here")
                     for actions in db.child("Packages").child(packageKey).get().val():
                         # print(actions)
-                        if actions != 'Metadata':
+                        if actions != 'Metadata' and actions != 'packageData':
                             # print(actions)
-                            data = {'PackageMetadata': db.child("Packages").child(packageKey).child(actions).get().val()['PackageMetadata'], 'Date': db.child("Packages").child(packageKey).child(actions).get().val()['Date'],'Action': db.child("Packages").child(packageKey).child(actions).get().val()['Action'], 'User': db.child("Packages").child(packageKey).child(actions).get().val()['User']}
+                            data = db.child("Packages").child(packageKey).child(actions).get().val()
                             returnData.append(data)
-                    return convertJSONFormat(200, data)
+                        # print(returnData)
+                    return convertJSONFormat(200, returnData)
                 else:
                     return convertJSONFormat(400, {'code': 400, 'message': 'No such package.'})
         except Exception:
@@ -166,10 +167,23 @@ def packageRetrieve(id):
 @app.route("/package/<id>", methods=['PUT'])
 def updatePackageVersion(id):
     try:
+        packageURL = None
+        packageContent = None
+        checkValues = []
+        checkValues = checkAuth()
         request.get_data()
+        if checkValues:
+            if checkValues[0] == 0:
+                return convertJSONFormat(401, {'code': 401, 'message': 'You do not have permission to add to the registry.'})
+        else:
+            return convertJSONFormat(400, {'code': 400, 'message': 'Unknown Error!  Please ensure that your request was made properly!'})
 
-        if(checkAuth() == 0): 
-            return convertJSONFormat(401, {'code': 401, 'message': 'Error!  You do not have the permissions to view this item!'})
+        currentUserName = checkValues[1]
+        currentIsAdmin = checkValues[2]
+
+
+        # if(checkAuth() == 0): 
+        #     return convertJSONFormat(401, {'code': 401, 'message': 'Error!  You do not have the permissions to view this item!'})
 
         #Load Request Body as JSON:
         req_body = json.loads(request.data.decode('utf-8'))
@@ -185,38 +199,49 @@ def updatePackageVersion(id):
 
         #Check that Metadata matches URL
         try:
-            if(id == req_body['ID']):
+            if(id == metadata['ID']):
                 #Select from database to make sure package exists:
-                search = db.child("package")
-                #Add filters for name...
-                search.order_by_child("Name").equal_to(metadata["Name"])
-                #...and version (specified as a unique identifier pair)
-                search.order_by_child("Version").equal_to(metadata["Version"])
+                for packageKey in db.child("Packages").get().val():
+                    # print(db.child("Packages").child(packageKey).get().val()['Metadata']['Name'])
+                    if db.child("Packages").child(packageKey).get().val()['Metadata']['Name'] == metadata['Name'] and db.child("Packages").child(packageKey).get().val()['Metadata']['ID'] == metadata['ID'] and db.child("Packages").child(packageKey).get().val()['Metadata']['Version'] == metadata['Version']:
+                        # print("reached here")
+                        db.child("Packages").child(packageKey).child("packageData").remove()
+                        db.child("Packages").child(packageKey).child("packageData").set(data)
+                        newData = {'Update' : {'User':{'name': currentUserName, 'isAdmin': currentIsAdmin},'Date': f"{datetime.datetime.now()}",'PackageMetadata': metadata,'Action': "Update"}}
+                        db.child("Packages").child(packageKey).update(newData)
+                        return convertJSONFormat(200, {'code' : 200, 'message': 'Package Updated'})
+                    else:
+                        return convertJSONFormat(400, {'code' : 400, 'message': 'Something went wrong woth updating'})
 
-                if(list(search.get()) != []): #If this is a valid (existing) identifier pair:
-                    #Get most recent package:
-                    former_version = search
-                    former_version.order_by_child("package").equal_to(id).get()
-                    #Remove most recent package:
-                    former_version.remove()
+                #Add filters for name...
+                # search.order_by_child("Name").equal_to(metadata["Name"])
+                # #...and version (specified as a unique identifier pair)
+                # search.order_by_child("Version").equal_to(metadata["Version"])
+
+                # if(list(search.get()) != []): #If this is a valid (existing) identifier pair:
+                #     #Get most recent package:
+                #     former_version = search
+                #     former_version.order_by_child("package").equal_to(id).get()
+                #     #Remove most recent package:
+                #     former_version.remove()
 
                     #Update with newest version with metadata and data info:
-                    package_payload = {
-                        'metadata':{
-                            'Name': metadata['Name'],
-                            'Version': metadata['Version'],
-                            'ID': metadata['ID']
-                        },
-                        'data':{
-                            'Content': data['Content'],
-                            'URL': data['URL'],
-                            'JSProgram': data['JSProgram']
-                        }
-                    }
+                    # package_payload = {
+                    #     'metadata':{
+                    #         'Name': metadata['Name'],
+                    #         'Version': metadata['Version'],
+                    #         'ID': metadata['ID']
+                    #     },
+                    #     'data':{
+                    #         'Content': data['Content'],
+                    #         'URL': data['URL'],
+                    #         'JSProgram': data['JSProgram']
+                    #     }
+                    # }
 
                     #Add to database:
-                    db.child("package").set(package_payload)
-                    return convertJSONFormat(200, {'code': 200, 'Payload': package_payload})
+                    # db.child("package").set(package_payload)
+                    
         except Exception:
             pass
 
@@ -289,40 +314,48 @@ def deletePackageVersion(id):
 @app.route("/package/<id>/rate", methods=['GET'])
 def ratePackage(id):
     try:
+        checkValues = []
+        checkValues = checkAuth()
         request.get_data()
+        if checkValues:
+            if checkValues[0] == 0:
+                return convertJSONFormat(401, {'code': 401, 'message': 'You do not have permission to modify the package.'})
+        else:
+            return convertJSONFormat(400, {'code': 400, 'message': 'Unknown Error!  Please ensure that your request was made properly!'})
+        
+        # request.get_data()
 
-        if(checkAuth() == 0): 
-            return convertJSONFormat(401, {'code': 401, 'message': 'Error!  You do not have the permissions to view this item!'})
+        # if(checkAuth() == 0): 
+        #     return convertJSONFormat(401, {'code': 401, 'message': 'Error!  You do not have the permissions to view this item!'})
 
         db = firebase.database()
-
-        results = db.child("package").order_by_child("ID").equal_to(id)
-
+        packageFound = 0
+        # results = db.child("package").order_by_child("ID").equal_to(id)
         try:
-            if(list(results.get()) != []):
-                #Query database for package by ID
-                pack = results.get()
-
-                try:
-                    netScore, rampUpScore, correctnessScore, busFactorScore, responsiveMaintainerScore, licenseScore = rate.call_main(pack['URL'])
-
-                    api_response = {{
-                    'BusFactor': busFactorScore,
-                    'Correctness': correctnessScore,
-                    'RampUp': rampUpScore,
-                    'ResponsiveMaintainer': responsiveMaintainerScore,
-                    'LicenseScore': licenseScore,
-                    'GoodPinningPractice': netScore
-                    }}
-
-
-                except Exception:
-                    return convertJSONFormat(500, {'code': 500, 'message': "The package rating system choked on at least one of the metrics."})
-                return convertJSONFormat(200, api_response)
+            #Query for all packages:
+            # packages = db.child("package").order_by_child("Name").equal_to(name).get()
+            for packageKey in db.child("Packages").get().val():
+                # print(packageKey)
+                if db.child("Packages").child(packageKey).get().val()['Metadata']['ID'] == id:
+                    # print("Reached Here")
+                    
+                    if 'URL' in db.child("Packages").child(packageKey).get().val()['packageData']:
+                        packageFound = 1
+                        try:
+                            # netScore, rampUpScore, correctnessScore, busFactorScore, responsiveMaintainerScore, licenseScore = rate.call_main(db.child("Packages").child(packageKey).get().val()['packageData']['URL'])
+                            packageRating = rate.call_main(db.child("Packages").child(packageKey).get().val()['packageData']['URL'])
+                            # print(packageRating)
+                            api_response = {'RampUp': packageRating[1],'Correctness': packageRating[2],'BusFactor': packageRating[3],'ResponsiveMaintainer': packageRating[4],'LicenseScore': packageRating[5],'GoodPinningPractice': packageRating[6]}
+                            return convertJSONFormat(200, api_response)
+                        except Exception:
+                            return convertJSONFormat(500, {'code': 500, 'message': "The package rating system choked on at least one of the metrics."})
+                        
+                # else:
+                #     return convertJSONFormat(400, {'code': 400, 'message': 'No such package.'})
+            if packageFound == 0:
+                return convertJSONFormat(400, {'code': 400, 'message': 'Package does not have a URL'})
         except Exception:
-            pass
-
-        return convertJSONFormat(400, {'code': 400, 'message': 'No such package.'})
+            return convertJSONFormat(400, {'code': 400, 'message': 'No such package.'})
     except Exception:
         return convertJSONFormat(400, {'code': 400, 'message': 'Unknown Error!  Please ensure that your request was made properly!'})
     
@@ -354,10 +387,10 @@ def resetRegistry():
 """
 /packages URLS:
 """
-@app.route("/packages", methods=['POST'])
+@app.route("/packages", methods=['GET'])
 def getPackages():
     try:
-        request.get_data()
+        # request.get_data()
 
         offset = 1
         try:
@@ -367,24 +400,51 @@ def getPackages():
 
         offset *= 10
 
-        if(checkAuth() == 0): 
-            return convertJSONFormat(401, {'code': 401, 'message': 'You do not have permission to view the registry.'})
+        # if(checkAuth() == 0): 
+        #     return convertJSONFormat(401, {'code': 401, 'message': 'You do not have permission to view the registry.'})
+        checkValues = []
+        checkValues = checkAuth()
+        request.get_data()
+        data = json.loads(request.data.decode('utf-8'))
+        if checkValues:
+            if checkValues[0] == 0:
+                return convertJSONFormat(401, {'code': 401, 'message': 'You do not have permission to add to the registry.'})
+        else:
+            return convertJSONFormat(400, {'code': 400, 'message': 'Unknown Error!  Please ensure that your request was made properly!'})
 
         try:
             db = firebase.database()
-            #Query for all packages:
-            packages = db.child("package").get()
-
+            allConditionsSatisfied = 1
             response = []
-
-            for i in packages:
-                offset -= 1
-                if offset >= 0:
-                    response.append({
-                    'id': i['id'],        
-                    'name': i['name'],        
-                    'tag': i['tag']
-                    })
+            #Query for all packages:
+            # packages = db.child("Packages").get().val()
+            # print(packages)
+            for packageKey in db.child("Packages").get().val():
+                for comparePackage in data:
+                    if 'Name' in comparePackage:
+                        # print(comparePackage['Name'])
+                        # print(db.child("Packages").child(packageKey).get().val()['Metadata']['Name'])
+                        if db.child("Packages").child(packageKey).get().val()['Metadata']['Name'] == comparePackage['Name']:
+                            allConditionsSatisfied = 1
+                        else:
+                            allConditionsSatisfied = 0
+                    if 'ID' in comparePackage:
+                        # print(comparePackage['ID'])
+                        # print(db.child("Packages").child(packageKey).get().val()['Metadata']['ID'])
+                        if db.child("Packages").child(packageKey).get().val()['Metadata']['ID'] == comparePackage['ID']:
+                            allConditionsSatisfied = 1
+                        else:
+                            allConditionsSatisfied = 0
+                    if 'Version' in comparePackage:
+                        # print(comparePackage['Version'])
+                        # print(db.child("Packages").child(packageKey).get().val()['Metadata']['Version'])
+                        if db.child("Packages").child(packageKey).get().val()['Metadata']['Version'] == comparePackage['Version']:
+                            allConditionsSatisfied = 1
+                        else:
+                            allConditionsSatisfied = 0
+                    # print(allConditionsSatisfied)
+                    if allConditionsSatisfied == 1:
+                        response.append(db.child("Packages").child(packageKey).get().val()['Metadata'])
             return convertJSONFormat(200, response)
         except Exception:
             return convertJSONFormat(400, {'code': 400, 'message': 'Error! Something went wrong when processing your request!'})   
@@ -447,19 +507,21 @@ def createPackage():
         if packageURL:
             # print("URL Rating Startd")
             packageRatings = rate.call_main(packageURL)
-            print(packageRatings)
-            # if packageRatings[0] > 0.5:
+            # print(packageRatings)
+            if packageRatings[0] > 0.5:
             # data = {'Name': metadata['Name'], 'Version': metadata['Version'], 'ID': metadata['ID'], 'packageData': data}
             # db.child("Packages").child(metadata['ID']).set(data)
-            packageMetaData = {'Name': metadata['Name'], 'Version': metadata['Version'], 'ID': metadata['ID']}
-            data = {'Ingest' : {'User':{'name': currentUserName, 'isAdmin': currentIsAdmin},'Date': f"{datetime.datetime.now()}",'PackageMetadata': packageMetaData, 'packageData': data,'Action': "Create" }}
-            db.child("Packages").child(metadata['ID']).set(data)
+                packageMetaData = {'Name': metadata['Name'], 'Version': metadata['Version'], 'ID': metadata['ID']}
+                data = {'Ingest' : {'User':{'name': currentUserName, 'isAdmin': currentIsAdmin},'Date': f"{datetime.datetime.now()}",'PackageMetadata': packageMetaData, 'Action': "Create" }, 'Metadata': packageMetaData, 'packageData': data}
+                db.child("Packages").child(metadata['ID']).set(data)
+            else:
+                return convertJSONFormat(400, {'code': 400, 'message': 'Package trying to get ingested has a rating lower than 0.5'})
             # print("Pakage Created when URL was provided")
-        elif packageContent:
+        if packageContent:
             # print("The world is here")
             packageMetaData = {'Name': metadata['Name'], 'Version': metadata['Version'], 'ID': metadata['ID']}
-            data = {'Create' : {'User':{'name': currentUserName, 'isAdmin': currentIsAdmin},'Date': f"{datetime.datetime.now()}",'PackageMetadata': packageMetaData, 'packageData': data,'Action': "Create"}, 'Metadata': packageMetaData}
-            db.child("Packages").child(metadata['Name']).set(data)
+            data = {'Create' : {'User':{'name': currentUserName, 'isAdmin': currentIsAdmin},'Date': f"{datetime.datetime.now()}",'PackageMetadata': packageMetaData,'Action': "Create"}, 'Metadata': packageMetaData, 'packageData': data}
+            db.child("Packages").child(metadata['ID']).set(data)
 
         # print("metadata set")
         # db.set(data)
@@ -534,11 +596,12 @@ def getPackageByName(name):
                     # print("Reached here")
                     for actions in db.child("Packages").child(packageKey).get().val():
                         # print(actions)
-                        if actions != 'Metadata':
+                        if actions != 'Metadata' and actions != 'packageData':
                             # print(actions)
-                            data = {'PackageMetadata': db.child("Packages").child(packageKey).child(actions).get().val()['PackageMetadata'], 'Date': db.child("Packages").child(packageKey).child(actions).get().val()['Date'],'Action': db.child("Packages").child(packageKey).child(actions).get().val()['Action'], 'User': db.child("Packages").child(packageKey).child(actions).get().val()['User']}
+                            # data = {'PackageMetadata': db.child("Packages").child(packageKey).child(actions).get().val()['PackageMetadata'], 'Date': db.child("Packages").child(packageKey).child(actions).get().val()['Date'],'Action': db.child("Packages").child(packageKey).child(actions).get().val()['Action'], 'User': db.child("Packages").child(packageKey).child(actions).get().val()['User']}
+                            data = db.child("Packages").child(packageKey).child(actions).get().val()
                             returnData.append(data)
-                    return convertJSONFormat(200, data)
+                    return convertJSONFormat(200, returnData)
                 else:
                     return convertJSONFormat(400, {'code': 400, 'message': 'No such package.'})
         except Exception:
