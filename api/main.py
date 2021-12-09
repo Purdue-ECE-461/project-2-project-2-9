@@ -43,17 +43,44 @@ def convertJSONFormat(code, data):
 
 def checkAuth():
     #Get & process authentification
-    auth_token = request.headers.get('X-Authorization').split()[1]
+    # auth_token = request.headers.get('X-Authorization').split()[1]
+    auth_token = ''
+    userFound = False
+    header_tuples = request.headers
+    # print(header_tuples)
+    for i in header_tuples:
+        if 'X-Authorization' in i:
+            auth_token = i[1]
+    # auth_token = json.loads(auth_token)
+    # print(auth_token)
 
     try:
         #Check permissions:
         #   1. Search db of Users with auth_token as filter:
+        # print("try started")
         db = firebase.database()
-        auth_validation = db.child("User").order_by_child("Token").equal_to(auth_token)
-        #   2. Get results & return if the query yields any Users
-        return len(list(auth_validation.fetch()))
+        auth_validation = db.child("Users").get()
+        for i in auth_validation.val():
+            if auth_validation.val()[i]['Token'] == auth_token:
+                userName = auth_validation.val()[i]['User']['name']
+                isUserAdmin = auth_validation.val()[i]['User']['isAdmin']
+                userFound = True
+                
+
+        if userFound:
+            return [1, userName, isUserAdmin]
     except Exception:
-        return 0
+        return [0, None, None]
+
+#     try:
+#         #Check permissions:
+#         #   1. Search db of Users with auth_token as filter:
+#         db = firebase.database()
+#         auth_validation = db.child("User").order_by_child("Token").equal_to(auth_token)
+#         #   2. Get results & return if the query yields any Users
+#         return len(list(auth_validation.fetch()))
+#     except Exception:
+#         return 0
 
 """
 /package/<id> URLS:
@@ -224,18 +251,28 @@ def ratePackage(id):
 """
 @app.route("/reset", methods=['DEL'])
 def resetRegistry():
-    try:
-        request.get_data()
-        
-        if(checkAuth() == 0): 
+	
+    checkValues = []
+    checkValues = checkAuth()
+    request.get_data()
+    if checkValues:
+        if checkValues[0] == 0:
             return convertJSONFormat(401, {'code': 401, 'message': 'You do not have permission to reset the registry.'})
+    else:
+            return convertJSONFormat(400, {'code': 400, 'message': 'Unknown Error!  Please ensure that your request was made properly!'})
+#     try:
+#         request.get_data()
+	
+        
+#         if(checkAuth() == 0): 
+#             return convertJSONFormat(401, {'code': 401, 'message': 'You do not have permission to reset the registry.'})
 
         db = firebase.database()
         #Query for all packages:
-        packages = db.child("package")
+        packages = db.child("Packages")
 
         try:
-            packages.remove
+            packages.remove()
             return convertJSONFormat(200, {'code': 200, 'message': 'Registry is reset.'})
         except Exception:
             return convertJSONFormat(401, {'code': 401, 'message': 'Something went wrong when trying to reset the registry!'})
@@ -287,36 +324,105 @@ def getPackages():
 """
 @app.route("/package", methods=['POST'])
 def createPackage():
-    try:
-        request.get_data()
-        
-        if(checkAuth() == 0): 
+    # print("create package called")
+    packageURL = None
+    packageContent = None
+    checkValues = []
+    checkValues = checkAuth()
+    request.get_data()
+    if checkValues:
+        if checkValues[0] == 0:
             return convertJSONFormat(401, {'code': 401, 'message': 'You do not have permission to add to the registry.'})
-        
-        #Load Request Body as JSON:
-        req_body = json.loads(request.data.decode('utf-8'))
+    else:
+            return convertJSONFormat(400, {'code': 400, 'message': 'Unknown Error!  Please ensure that your request was made properly!'})
 
-        #Parse Data as metadata and data:
-        try:
-            metadata = req_body['metadata']
-            data = req_body['data']
-        except Exception:
-            return convertJSONFormat(400, {'code': 400, 'message': 'Malformed request.'})
-        
-        db = firebase.database()
-        try:
-            #Check if package exists:
-            if list(db.child("package").order_by_child("ID").equal_to(metadata["id"].get())):
-                return convertJSONFormat(403, {'code': 403, 'message': 'Package exists already.'})
 
-            data = {'Name': metadata['Name'], 'Version': metadata['Version'], 'ID': metadata['ID']}
-            db.set(data)
-            
-            return convertJSONFormat(201, data)
-        except Exception:
-            return convertJSONFormat(400, {'code': 400, 'message': 'Something went wrong when trying to add a package.'})
+    currentUserName = checkValues[1]
+    currentIsAdmin = checkValues[2]
+    #Load Request Body as JSON:
+    req_body = json.loads(request.data.decode('utf-8'))
+    # print(req_body)
+    
+
+    #Parse Data as metadata and data:
+    try:
+        metadata = req_body['metadata']
+        data = req_body['data']
+
+        if 'URL' in data:
+            packageURL = data['URL']
+            # print(packageURL)
+        elif 'Content' in data:
+            packageContent = data['Content']
+        
+        # print(packageURL)
+        # print(packageContent)
+
     except Exception:
-        return convertJSONFormat(400, {'code': 400, 'message': 'Unknown Error!  Please ensure that your request was made properly!'})
+        return convertJSONFormat(400, {'code': 400, 'message': 'Malformed request.'})
+    
+    db = firebase.database()
+
+    try:
+        
+        #Check if package exists:
+        if db.child("Packages").get().val():
+            for packageKey in db.child("Packages").get().val():
+                # print(packageKey)
+                if req_body['metadata']['ID'] == packageKey:
+                    return convertJSONFormat(403, {'code': 403, 'message': 'Package exists already.'})
+        #Check if Package is INGESTIBLE
+        if packageURL:
+            # print("URL Rating Startd")
+            # packageRatings = rate.call_main(packageURL)
+            # print(packageRatings)
+            # if packageRatings[0] > 0.5:
+            data = {'Name': metadata['Name'], 'Version': metadata['Version'], 'ID': metadata['ID'], 'packageData': data}
+            db.child("Packages").child(metadata['ID']).set(data)
+            # print("Pakage Created when URL was provided")
+        elif packageContent:
+            # print("The world is here")
+            packageMetaData = {'Name': metadata['Name'], 'Version': metadata['Version'], 'ID': metadata['ID']}
+            data = {'User':{'name': currentUserName, 'isAdmin': currentIsAdmin},'Date': f"{datetime.datetime.now()}",'PackageMetadata': packageMetaData, 'packageData': data,'Action': "Create" }
+            db.child("Packages").child(metadata['ID']).set(data)
+
+        # print("metadata set")
+        # db.set(data)
+        
+        return convertJSONFormat(201, packageMetaData)
+    except Exception:
+        return convertJSONFormat(400, {'code': 400, 'message': 'Something went wrong when trying to add a package.'})
+# def createPackage():
+#     try:
+#         request.get_data()
+        
+#         if(checkAuth() == 0): 
+#             return convertJSONFormat(401, {'code': 401, 'message': 'You do not have permission to add to the registry.'})
+        
+#         #Load Request Body as JSON:
+#         req_body = json.loads(request.data.decode('utf-8'))
+
+#         #Parse Data as metadata and data:
+#         try:
+#             metadata = req_body['metadata']
+#             data = req_body['data']
+#         except Exception:
+#             return convertJSONFormat(400, {'code': 400, 'message': 'Malformed request.'})
+        
+#         db = firebase.database()
+#         try:
+#             #Check if package exists:
+#             if list(db.child("package").order_by_child("ID").equal_to(metadata["id"].get())):
+#                 return convertJSONFormat(403, {'code': 403, 'message': 'Package exists already.'})
+
+#             data = {'Name': metadata['Name'], 'Version': metadata['Version'], 'ID': metadata['ID']}
+#             db.set(data)
+            
+#             return convertJSONFormat(201, data)
+#         except Exception:
+#             return convertJSONFormat(400, {'code': 400, 'message': 'Something went wrong when trying to add a package.'})
+#     except Exception:
+#         return convertJSONFormat(400, {'code': 400, 'message': 'Unknown Error!  Please ensure that your request was made properly!'})
 
 """
 /package/byName/<name> URLS:
