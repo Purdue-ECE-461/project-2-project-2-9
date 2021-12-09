@@ -249,7 +249,7 @@ def ratePackage(id):
 """
 /reset URL:
 """
-@app.route("/reset", methods=['DEL'])
+@app.route("/reset", methods=['DELETE'])
 def resetRegistry():
     checkValues = []
     checkValues = checkAuth()
@@ -505,7 +505,7 @@ class Authenticate(Resource):
             # token_with_additional_claims = auth.create_custom_token(token, {"isAdmin": isAdmin})
 
             # Pass the user's idToken to the push method
-            db.child("users").child(user_name).set(data)
+            db.child("Users").child(user_name).set(data)
 
 
 
