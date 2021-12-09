@@ -381,7 +381,7 @@ class Authenticate(Resource):
     # @marshal_with(metadata_payload)
     def put(self):
         try:
-            data = request.data
+            data = request.get_data()
             # print(data)
             data = json.loads(data)
             # print(data['User']['name'])
