@@ -17,7 +17,7 @@ import main_rate as rate
 # }
 
 config = {
-  "apiKey": secrets.API_KEY,
+  "apiKey": f"{${{secrets.API_KEY}}}",
   "authDomain": "lexical-botany-331616.firebaseapp.com",
   "databaseURL": "https://lexical-botany-331616-default-rtdb.firebaseio.com/",
   "storageBucket": "lexical-botany-331616.appspot.com"
