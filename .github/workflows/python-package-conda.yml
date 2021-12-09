@@ -50,7 +50,7 @@ jobs:
     - name: Test API with pytest
       run: |
         conda install pytest
-        pytest api/test_api.py
+        pytest --cov-report term --cov=. test_api.py --cov-report=html
         
     #BEGIN GOOGLE APP ENGINE DEPLOYMENT:
     
