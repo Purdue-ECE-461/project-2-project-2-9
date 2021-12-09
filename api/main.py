@@ -2,7 +2,7 @@ import json
 import datetime
 import jwt
 import pyrebase
-
+import base64
 from flask import Flask, jsonify
 from flask_restful import Api, Resource, request
 from google.cloud import firestore
@@ -116,6 +116,8 @@ def packageRetrieve(id):
                     # print(actions)
                 if db.child("Packages").child(packageKey).get().val()['Metadata']['ID'] == id:
                     # print("Reached here")
+                    newData = {'Download' : {'User':{'name': checkValues[1], 'isAdmin': checkValues[2]},'Date': f"{datetime.datetime.now()}",'PackageMetadata': db.child("Packages").child(packageKey).get().val()['Metadata'],'Action': "Download"}}
+                    db.child("Packages").child(packageKey).update(newData)
                     packageNotFound = 0
                     for actions in db.child("Packages").child(packageKey).get().val():
                         # print(actions)
@@ -532,6 +534,16 @@ def createPackage():
             # print("Pakage Created when URL was provided")
         if packageContent:
             # print("The world is here")
+            # print("reched here")
+            # base64_message = base64.b64decode(data)
+    
+            # print(type(base64_message))
+            # contentOutput = base64_message.decode()
+            # print(contentOutput)
+            # print("reched here 2")
+            # output = json.loads(output)
+            # print("reched here 3")
+           
             packageMetaData = {'Name': metadata['Name'], 'Version': metadata['Version'], 'ID': metadata['ID']}
             data = {'Create' : {'User':{'name': currentUserName, 'isAdmin': currentIsAdmin},'Date': f"{datetime.datetime.now()}",'PackageMetadata': packageMetaData,'Action': "Create"}, 'Metadata': packageMetaData, 'packageData': data}
             db.child("Packages").child(metadata['ID']).set(data)
@@ -607,6 +619,8 @@ def getPackageByName(name):
                 # for actions in db.child("Packages").child(packageKey).get().val():
                     # print(actions)
                 if db.child("Packages").child(packageKey).get().val()['Metadata']['Name'] == name:
+                    newData = {'Download' : {'User':{'name': checkValues[1], 'isAdmin': checkValues[2]},'Date': f"{datetime.datetime.now()}",'PackageMetadata': db.child("Packages").child(packageKey).get().val()['Metadata'],'Action': "Download"}}
+                    db.child("Packages").child(packageKey).update(newData)
                     # print("Reached here")
                     packageNotFound = 0
                     for actions in db.child("Packages").child(packageKey).get().val():
