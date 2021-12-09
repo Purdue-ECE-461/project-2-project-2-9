@@ -323,6 +323,8 @@ def ratePackage(id):
         else:
             return convertJSONFormat(400, {'code': 400, 'message': 'Unknown Error!  Please ensure that your request was made properly!'})
         
+        currentUserName = checkValues[1]
+        currentIsAdmin = checkValues[2]
         # request.get_data()
 
         # if(checkAuth() == 0): 
@@ -345,7 +347,10 @@ def ratePackage(id):
                             # netScore, rampUpScore, correctnessScore, busFactorScore, responsiveMaintainerScore, licenseScore = rate.call_main(db.child("Packages").child(packageKey).get().val()['packageData']['URL'])
                             packageRating = rate.call_main(db.child("Packages").child(packageKey).get().val()['packageData']['URL'])
                             # print(packageRating)
+                            metadata = db.child("Packages").child(packageKey).get().val()['Metadata']
                             api_response = {'RampUp': packageRating[1],'Correctness': packageRating[2],'BusFactor': packageRating[3],'ResponsiveMaintainer': packageRating[4],'LicenseScore': packageRating[5],'GoodPinningPractice': packageRating[6]}
+                            newData = {'Rate' : {'User':{'name': currentUserName, 'isAdmin': currentIsAdmin},'Date': f"{datetime.datetime.now()}",'PackageMetadata': metadata,'Action': "Rate"}}
+                            db.child("Packages").child(packageKey).update(newData)
                             return convertJSONFormat(200, api_response)
                         except Exception:
                             return convertJSONFormat(500, {'code': 500, 'message': "The package rating system choked on at least one of the metrics."})
