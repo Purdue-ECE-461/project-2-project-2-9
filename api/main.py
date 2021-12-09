@@ -369,7 +369,10 @@ def createPackage():
             # packageRatings = rate.call_main(packageURL)
             # print(packageRatings)
             # if packageRatings[0] > 0.5:
-            data = {'Name': metadata['Name'], 'Version': metadata['Version'], 'ID': metadata['ID'], 'packageData': data}
+            # data = {'Name': metadata['Name'], 'Version': metadata['Version'], 'ID': metadata['ID'], 'packageData': data}
+            # db.child("Packages").child(metadata['ID']).set(data)
+            packageMetaData = {'Name': metadata['Name'], 'Version': metadata['Version'], 'ID': metadata['ID']}
+            data = {'User':{'name': currentUserName, 'isAdmin': currentIsAdmin},'Date': f"{datetime.datetime.now()}",'PackageMetadata': packageMetaData, 'packageData': data,'Action': "Create" }
             db.child("Packages").child(metadata['ID']).set(data)
             # print("Pakage Created when URL was provided")
         elif packageContent:
@@ -469,15 +472,18 @@ def deletePackageVersions(name):
         try:
             for packageKey in db.child("Packages").get().val():
                 # print(packageKey)
-                if packageKey['PackageMetadata']['Name'] == name:
-                    packageKey.remove()
+                print(db.child("Packages").get().val()[packageKey])
+                if db.child("Packages").get().val()[packageKey]['PackageMetadata']['Name'] == name:
+                    # print("Package Removed")
+                    db.child("Packages").child(packageKey).remove()
                     return convertJSONFormat(200, {'code': 200, 'message': 'Package is deleted.'})
+                else:
+                    return convertJSONFormat(400, {'code': 400, 'message': 'No such package.'})
         except Exception:
             return convertJSONFormat(400, {'code': 400, 'message': 'Error in retrieving package for deletion.'})
 
         # if(list(packages.get())==[]):
         #     return convertJSONFormat(400, {'code': 400, 'message': 'No such package.'})
-
         # try:
         #     packages.remove()
         #     return convertJSONFormat(200, {'code': 200, 'message': 'Package is deleted.'})
