@@ -50,7 +50,7 @@ jobs:
     - name: Test API with pytest
       run: |
         conda install pytest
-        pytest test_api.py
+        pytest api/test_api.py
     
         
     #BEGIN GOOGLE APP ENGINE DEPLOYMENT:
