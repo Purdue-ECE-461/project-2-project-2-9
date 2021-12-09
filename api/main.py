@@ -251,26 +251,18 @@ def ratePackage(id):
 """
 @app.route("/reset", methods=['DEL'])
 def resetRegistry():
-	
     checkValues = []
     checkValues = checkAuth()
-    request.get_data()
-    if checkValues:
-        if checkValues[0] == 0:
-            return convertJSONFormat(401, {'code': 401, 'message': 'You do not have permission to reset the registry.'})
-    else:
-            return convertJSONFormat(400, {'code': 400, 'message': 'Unknown Error!  Please ensure that your request was made properly!'})
-#     try:
-#         request.get_data()
-	
-        
-#         if(checkAuth() == 0): 
-#             return convertJSONFormat(401, {'code': 401, 'message': 'You do not have permission to reset the registry.'})
-
+    try:
+        request.get_data()
+        if checkValues:
+            if checkValues[0] == 0:
+                return convertJSONFormat(401, {'code': 401, 'message': 'You do not have permission to reset the registry.'})
+        else:
+                return convertJSONFormat(400, {'code': 400, 'message': 'Unknown Error!  Please ensure that your request was made properly!'})
         db = firebase.database()
         #Query for all packages:
         packages = db.child("Packages")
-
         try:
             packages.remove()
             return convertJSONFormat(200, {'code': 200, 'message': 'Registry is reset.'})
