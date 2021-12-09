@@ -88,38 +88,80 @@ def checkAuth():
 @app.route("/package/<id>", methods=['GET'])
 def packageRetrieve(id):
     try:
-        request.get_data()    
-
-        if(checkAuth() == 0): 
-            return convertJSONFormat(401, {'code': 401, 'message': 'Error!  You do not have the permissions to view this item!'})
+        checkValues = []
+        returnData = []
+        checkValues = checkAuth()
+        request.get_data()
+        if checkValues:
+            if checkValues[0] == 0:
+                return convertJSONFormat(401, {'code': 401, 'message': 'You do not have permission to modify the package.'})
+        else:
+            return convertJSONFormat(400, {'code': 400, 'message': 'Unknown Error!  Please ensure that your request was made properly!'})
+        # request.get_data()
+        
+        # if(checkAuth() == 0): 
+        #     return convertJSONFormat(401, {'code': 401, 'message': 'You do not have permission to view the package.'})
 
         db = firebase.database()
-        
+
         try:
-            results = db.child("package").order_by_child("ID").equal_to(id).get()
-            if(list(results) != []):
-                #Query for package by ID
-                pack = results.get(results.key('package', id))
-
-                api_response = {
-                    'metadata': {
-                            'Name': pack['Name'],
-                            'Version': pack['Version'],
-                            'ID': pack['ID']
-                        },
-                        'data': {
-                            'Content': pack['Content'],
-                            'URL': pack['URL'],
-                            'JSProgram': pack['JSProgram']
-                        }   
-                    }
-                return convertJSONFormat(200, api_response)
+            #Query for all packages:
+            # packages = db.child("package").order_by_child("Name").equal_to(name).get()
+            for packageKey in db.child("Packages").get().val():
+                # print(packageKey)
+                # print(name)
+                # print(db.child("Packages").child(packageKey).get().val())
+                # for actions in db.child("Packages").child(packageKey).get().val():
+                    # print(actions)
+                if db.child("Packages").child(packageKey).get().val()['Metadata']['ID'] == id:
+                    # print("Reached here")
+                    for actions in db.child("Packages").child(packageKey).get().val():
+                        # print(actions)
+                        if actions != 'Metadata':
+                            # print(actions)
+                            data = {'PackageMetadata': db.child("Packages").child(packageKey).child(actions).get().val()['PackageMetadata'], 'Date': db.child("Packages").child(packageKey).child(actions).get().val()['Date'],'Action': db.child("Packages").child(packageKey).child(actions).get().val()['Action'], 'User': db.child("Packages").child(packageKey).child(actions).get().val()['User']}
+                            returnData.append(data)
+                    return convertJSONFormat(200, data)
+                else:
+                    return convertJSONFormat(400, {'code': 400, 'message': 'No such package.'})
         except Exception:
-            pass
-
-        return convertJSONFormat(400, {'code': 400, 'message': 'Error! Something went wrong when processing your request!  Please ensure that your request was made properly!'})
+            return convertJSONFormat(400, {'code': 400, 'message': 'Error in retrieving package.'})
     except Exception:
         return convertJSONFormat(400, {'code': 400, 'message': 'Unknown Error!  Please ensure that your request was made properly!'})
+    # try:
+    #     request.get_data()    
+
+    #     if(checkAuth() == 0): 
+    #         return convertJSONFormat(401, {'code': 401, 'message': 'Error!  You do not have the permissions to view this item!'})
+
+    #     db = firebase.database()
+        
+    #     try:
+    #         results = db.child("package").order_by_child("ID").equal_to(id).get()
+    #         if(list(results) != []):
+    #             #Query for package by ID
+    #             pack = results.get(results.key('package', id))
+
+    #             api_response = {
+    #                 'metadata': {
+    #                         'Name': pack['Name'],
+    #                         'Version': pack['Version'],
+    #                         'ID': pack['ID']
+    #                     },
+    #                     'data': {
+    #                         'Content': pack['Content'],
+    #                         'URL': pack['URL'],
+    #                         'JSProgram': pack['JSProgram']
+    #                     }   
+    #                 }
+    #             return convertJSONFormat(200, api_response)
+    #     except Exception:
+    #         pass
+
+    #     return convertJSONFormat(400, {'code': 400, 'message': 'Error! Something went wrong when processing your request!  Please ensure that your request was made properly!'})
+    # except Exception:
+    #     return convertJSONFormat(400, {'code': 400, 'message': 'Unknown Error!  Please ensure that your request was made properly!'})
+
 
 @app.route("/package/<id>", methods=['PUT'])
 def updatePackageVersion(id):
@@ -182,29 +224,67 @@ def updatePackageVersion(id):
     except Exception:
         return convertJSONFormat(400, {'code': 400, 'message': 'Unknown Error!  Please ensure that your request was made properly!'})
 
-@app.route("/package/<id>", methods=['DEL'])
+@app.route("/package/<id>", methods=['DELETE'])
 def deletePackageVersion(id):
     try:
+        checkValues = []
+        checkValues = checkAuth()
         request.get_data()
+        if checkValues:
+            if checkValues[0] == 0:
+                return convertJSONFormat(401, {'code': 401, 'message': 'You do not have permission to modify the package.'})
+        else:
+            return convertJSONFormat(400, {'code': 400, 'message': 'Unknown Error!  Please ensure that your request was made properly!'})
         
-        if(checkAuth() == 0): 
-            return convertJSONFormat(401, {'code': 401, 'message': 'Error!  You do not have the permissions to delete this item!'})
-        
+        # if(checkAuth() == 0): 
+        #     return convertJSONFormat(401, {'code': 401, 'message': 'You do not have permission '})
+
         db = firebase.database()
 
+        #Try Deleting the package:
         try:
-            #Query packages to find package {id}
-            results = db.child("package").order_by_child("ID").equal_to(id)
-            if(list(results.get()) != []):
-                #Delete package by ID:
-                results.remove()
-                return convertJSONFormat(200, {'code': 200, 'message': 'Package is deleted.'})
+            for packageKey in db.child("Packages").get().val():
+                # print(packageKey)
+                # print(db.child("Packages").get().val()[packageKey])
+                if db.child("Packages").child(packageKey).get().val()['Metadata']['ID'] == id:
+                    # print("Package Removed")
+                    db.child("Packages").child(packageKey).remove()
+                    return convertJSONFormat(200, {'code': 200, 'message': 'Package is deleted.'})
+                else:
+                    return convertJSONFormat(400, {'code': 400, 'message': 'No such package.'})
         except Exception:
-            pass
+            return convertJSONFormat(400, {'code': 400, 'message': 'Error in retrieving package for deletion.'})
 
-        return convertJSONFormat(400, {'code': 400, 'message':'No such package.'})
+        # if(list(packages.get())==[]):
+        #     return convertJSONFormat(400, {'code': 400, 'message': 'No such package.'})
+        # try:
+        #     packages.remove()
+        #     return convertJSONFormat(200, {'code': 200, 'message': 'Package is deleted.'})
+        # except Exception:
+        #     return convertJSONFormat(400, {'code': 400, 'message': 'Error in deleting package.'})
     except Exception:
         return convertJSONFormat(400, {'code': 400, 'message': 'Unknown Error!  Please ensure that your request was made properly!'})
+    # try:
+    #     request.get_data()
+        
+    #     if(checkAuth() == 0): 
+    #         return convertJSONFormat(401, {'code': 401, 'message': 'Error!  You do not have the permissions to delete this item!'})
+        
+    #     db = firebase.database()
+
+    #     try:
+    #         #Query packages to find package {id}
+    #         results = db.child("package").order_by_child("ID").equal_to(id)
+    #         if(list(results.get()) != []):
+    #             #Delete package by ID:
+    #             results.remove()
+    #             return convertJSONFormat(200, {'code': 200, 'message': 'Package is deleted.'})
+    #     except Exception:
+    #         pass
+
+    #     return convertJSONFormat(400, {'code': 400, 'message':'No such package.'})
+    # except Exception:
+    #     return convertJSONFormat(400, {'code': 400, 'message': 'Unknown Error!  Please ensure that your request was made properly!'})
 
 @app.route("/package/<id>/rate", methods=['GET'])
 def ratePackage(id):
@@ -366,8 +446,8 @@ def createPackage():
         #Check if Package is INGESTIBLE
         if packageURL:
             # print("URL Rating Startd")
-            # packageRatings = rate.call_main(packageURL)
-            # print(packageRatings)
+            packageRatings = rate.call_main(packageURL)
+            print(packageRatings)
             # if packageRatings[0] > 0.5:
             # data = {'Name': metadata['Name'], 'Version': metadata['Version'], 'ID': metadata['ID'], 'packageData': data}
             # db.child("Packages").child(metadata['ID']).set(data)
