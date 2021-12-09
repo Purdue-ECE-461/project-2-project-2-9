@@ -249,7 +249,7 @@ def ratePackage(id):
 """
 /reset URL:
 """
-@app.route("/reset", methods=['DEL'])
+@app.route("/reset", methods=['DELETE'])
 def resetRegistry():
     checkValues = []
     checkValues = checkAuth()
@@ -485,6 +485,30 @@ def deletePackageVersions(name):
         #     return convertJSONFormat(400, {'code': 400, 'message': 'Error in deleting package.'})
     except Exception:
         return convertJSONFormat(400, {'code': 400, 'message': 'Unknown Error!  Please ensure that your request was made properly!'})
+#     try:
+#         request.get_data()
+        
+#         if(checkAuth() == 0): 
+#             return convertJSONFormat(401, {'code': 401, 'message': 'You do not have permission to modify the package.'})
+
+#         db = firebase.database()
+
+#         #Query for all packages:
+#         try:
+#             packages = db.child("package").order_by_child("Name").equal_to(name)
+#         except Exception:
+#             return convertJSONFormat(400, {'code': 400, 'message': 'Error in retrieving package for deletion.'})
+
+#         if(list(packages.get())==[]):
+#             return convertJSONFormat(400, {'code': 400, 'message': 'No such package.'})
+
+#         try:
+#             packages.remove()
+#             return convertJSONFormat(200, {'code': 200, 'message': 'Package is deleted.'})
+#         except Exception:
+#             return convertJSONFormat(400, {'code': 400, 'message': 'Error in deleting package.'})
+#     except Exception:
+#         return convertJSONFormat(400, {'code': 400, 'message': 'Unknown Error!  Please ensure that your request was made properly!'})
 
 class Authenticate(Resource):
     # @marshal_with(metadata_payload)
@@ -516,7 +540,7 @@ class Authenticate(Resource):
             # token_with_additional_claims = auth.create_custom_token(token, {"isAdmin": isAdmin})
 
             # Pass the user's idToken to the push method
-            db.child("users").child(user_name).set(data)
+            db.child("Users").child(user_name).set(data)
 
 
 
