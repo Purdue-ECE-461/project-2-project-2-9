@@ -9,7 +9,7 @@ load_dotenv()
 
 header = {
     'accept': 'application/vnd.github.v3+json',
-    'Authorization': f"token {os.getenv('GITHUB_TOKEN')}"
+    'Authorization': "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"
 }
 
 

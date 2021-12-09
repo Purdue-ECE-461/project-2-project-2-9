@@ -79,8 +79,8 @@ def main() -> None:
 
 def call_main(url):
     load_dotenv()
-    LOG_LEVEL = {'0': logging.CRITICAL, '1': logging.INFO, '2': logging.DEBUG}
-    logging.basicConfig(filename=os.getenv('LOG_FILE'), level=LOG_LEVEL[os.getenv('LOG_LEVEL')])
+    # LOG_LEVEL = {'0': logging.CRITICAL, '1': logging.INFO, '2': logging.DEBUG}
+    # logging.basicConfig(filename=os.getenv('LOG_FILE'), level=LOG_LEVEL[os.getenv('LOG_LEVEL')])
     #main()
     repoMetricsDict = {}
     repoList = []
@@ -98,7 +98,7 @@ def call_main(url):
     else:
         repoMetrics = metrics.Metrics(url)
 
-    logging.info(repoMetrics)
+    # logging.info(repoMetrics)
     repoList.append((url, repoMetrics.netScore))
     repoMetricsDict[url] = repoMetrics
 

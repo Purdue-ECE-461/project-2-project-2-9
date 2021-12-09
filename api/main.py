@@ -372,14 +372,14 @@ def createPackage():
             # data = {'Name': metadata['Name'], 'Version': metadata['Version'], 'ID': metadata['ID'], 'packageData': data}
             # db.child("Packages").child(metadata['ID']).set(data)
             packageMetaData = {'Name': metadata['Name'], 'Version': metadata['Version'], 'ID': metadata['ID']}
-            data = {'User':{'name': currentUserName, 'isAdmin': currentIsAdmin},'Date': f"{datetime.datetime.now()}",'PackageMetadata': packageMetaData, 'packageData': data,'Action': "Create" }
+            data = {'Ingest' : {'User':{'name': currentUserName, 'isAdmin': currentIsAdmin},'Date': f"{datetime.datetime.now()}",'PackageMetadata': packageMetaData, 'packageData': data,'Action': "Create" }}
             db.child("Packages").child(metadata['ID']).set(data)
             # print("Pakage Created when URL was provided")
         elif packageContent:
             # print("The world is here")
             packageMetaData = {'Name': metadata['Name'], 'Version': metadata['Version'], 'ID': metadata['ID']}
-            data = {'User':{'name': currentUserName, 'isAdmin': currentIsAdmin},'Date': f"{datetime.datetime.now()}",'PackageMetadata': packageMetaData, 'packageData': data,'Action': "Create" }
-            db.child("Packages").child(metadata['ID']).set(data)
+            data = {'Create' : {'User':{'name': currentUserName, 'isAdmin': currentIsAdmin},'Date': f"{datetime.datetime.now()}",'PackageMetadata': packageMetaData, 'packageData': data,'Action': "Create"}, 'Metadata': packageMetaData}
+            db.child("Packages").child(metadata['Name']).set(data)
 
         # print("metadata set")
         # db.set(data)
@@ -425,26 +425,42 @@ def createPackage():
 @app.route("/package/byName/<name>", methods=['GET'])
 def getPackageByName(name):
     try:
+        checkValues = []
+        returnData = []
+        checkValues = checkAuth()
         request.get_data()
+        if checkValues:
+            if checkValues[0] == 0:
+                return convertJSONFormat(401, {'code': 401, 'message': 'You do not have permission to modify the package.'})
+        else:
+            return convertJSONFormat(400, {'code': 400, 'message': 'Unknown Error!  Please ensure that your request was made properly!'})
+        # request.get_data()
         
-        if(checkAuth() == 0): 
-            return convertJSONFormat(401, {'code': 401, 'message': 'You do not have permission to view the package.'})
+        # if(checkAuth() == 0): 
+        #     return convertJSONFormat(401, {'code': 401, 'message': 'You do not have permission to view the package.'})
 
         db = firebase.database()
 
         try:
             #Query for all packages:
-            packages = db.child("package").order_by_child("Name").equal_to(name).get()
-
-            if(list(packages)==[]):
-                return convertJSONFormat(400, {'code': 400, 'message': 'No such package.'})
-
-            data = { 
-                'id': packages['id'],
-                'name': name,
-                'tag': packages['tag']
-            }
-            return convertJSONFormat(200, data)
+            # packages = db.child("package").order_by_child("Name").equal_to(name).get()
+            for packageKey in db.child("Packages").get().val():
+                # print(packageKey)
+                # print(name)
+                # print(db.child("Packages").child(packageKey).get().val())
+                # for actions in db.child("Packages").child(packageKey).get().val():
+                    # print(actions)
+                if db.child("Packages").child(packageKey).get().val()['Metadata']['Name'] == name:
+                    # print("Reached here")
+                    for actions in db.child("Packages").child(packageKey).get().val():
+                        # print(actions)
+                        if actions != 'Metadata':
+                            # print(actions)
+                            data = {'PackageMetadata': db.child("Packages").child(packageKey).child(actions).get().val()['PackageMetadata'], 'Date': db.child("Packages").child(packageKey).child(actions).get().val()['Date'],'Action': db.child("Packages").child(packageKey).child(actions).get().val()['Action'], 'User': db.child("Packages").child(packageKey).child(actions).get().val()['User']}
+                            returnData.append(data)
+                    return convertJSONFormat(200, data)
+                else:
+                    return convertJSONFormat(400, {'code': 400, 'message': 'No such package.'})
         except Exception:
             return convertJSONFormat(400, {'code': 400, 'message': 'Error in retrieving package.'})
     except Exception:
@@ -472,8 +488,8 @@ def deletePackageVersions(name):
         try:
             for packageKey in db.child("Packages").get().val():
                 # print(packageKey)
-                print(db.child("Packages").get().val()[packageKey])
-                if db.child("Packages").get().val()[packageKey]['PackageMetadata']['Name'] == name:
+                # print(db.child("Packages").get().val()[packageKey])
+                if db.child("Packages").child(packageKey).get().val()['Metadata']['Name'] == name:
                     # print("Package Removed")
                     db.child("Packages").child(packageKey).remove()
                     return convertJSONFormat(200, {'code': 200, 'message': 'Package is deleted.'})
