@@ -448,7 +448,7 @@ def getPackageByName(name):
         return convertJSONFormat(400, {'code': 400, 'message': 'Unknown Error!  Please ensure that your request was made properly!'})
     
 
-@app.route("/package/byName/<name>", methods=['DEL'])
+@app.route("/package/byName/<name>", methods=['DELETE'])
 def deletePackageVersions(name):
     try:
         checkValues = []
