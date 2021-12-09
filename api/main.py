@@ -9,19 +9,19 @@ from google.cloud import firestore
 
 import main_rate as rate
 
-# config = {
-#   "apiKey": "AIzaSyAgpUJ9lfto0Qn3WX4T_BO6Hp458yWDB2o",
-#   "authDomain": "test-ae93d.firebaseapp.com",
-#   "databaseURL": "https://test-ae93d-default-rtdb.firebaseio.com/",
-#   "storageBucket": "test-ae93d.appspot.com"
-# }
-
 config = {
-  "apiKey": f"{${{secrets.API_KEY}}}",
-  "authDomain": "lexical-botany-331616.firebaseapp.com",
-  "databaseURL": "https://lexical-botany-331616-default-rtdb.firebaseio.com/",
-  "storageBucket": "lexical-botany-331616.appspot.com"
+  "apiKey": "AIzaSyAgpUJ9lfto0Qn3WX4T_BO6Hp458yWDB2o",
+  "authDomain": "test-ae93d.firebaseapp.com",
+  "databaseURL": "https://test-ae93d-default-rtdb.firebaseio.com/",
+  "storageBucket": "test-ae93d.appspot.com"
 }
+
+# config = {
+#   "apiKey": f"{${{secrets.API_KEY}}}",
+#   "authDomain": "lexical-botany-331616.firebaseapp.com",
+#   "databaseURL": "https://lexical-botany-331616-default-rtdb.firebaseio.com/",
+#   "storageBucket": "lexical-botany-331616.appspot.com"
+# }
 
 firebase = pyrebase.initialize_app(config)
 app = Flask(__name__)
