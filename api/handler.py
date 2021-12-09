@@ -9,7 +9,7 @@ load_dotenv()
 
 header = {
     'accept': 'application/vnd.github.v3+json',
-    'Authorization': "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"
+    'Authorization': "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"
 }
 
 
@@ -91,12 +91,18 @@ def getDependencies(owner: str, module: str) -> dict:
     # baseURL = baseURL + "/contents/package.json"
     # response = requests.get(baseURL, headers=headers)
     # data = response.json()
+    # print("Before Requests")
     data = requests.get(url='https://api.github.com/repos/' + owner + '/' + module + '/contents/package.json',  headers=header).json()
+    # print("After Requests")
     if 'content' in data:
+        # print("Getting Here")
         base64_message = base64.b64decode(data['content'])
         output = base64_message.decode()
         output = json.loads(output)
-        dependencies = output['dependencies']
+        if 'dependencies' in output:
+            dependencies = output['dependencies']
+        else:
+            dependencies={}
         # print(type(output))
     else:
         output = {}

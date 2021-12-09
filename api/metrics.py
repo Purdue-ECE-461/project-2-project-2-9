@@ -229,7 +229,7 @@ class Metrics:
         totalDependencies = len(issuesResponse)
         pinnedDependencies = 0;
         nonPinnedDependencies = 0;
-
+        
         try:
             if  totalDependencies > 0:
                 for dependency in issuesResponse:
@@ -265,9 +265,16 @@ class Metrics:
 
     def runMetrics(self) -> None:
         self.setRampUp()
+        # print("RampUp Work")
         self.setCorrectness()
+        # print("setCorrectness Work")
         self.setBusFactor()
+        # print("setBusFactor Work")
         self.setResponsiveMaintainer()
+        # print("setResponsiveMaintainer Work")
         self.setLicense()
+        # print("setLicense Work")
         self.setDependencyScore()
+        # print("setDependencyScore Work")
         self.setNet()
+        # print("setNet Work")

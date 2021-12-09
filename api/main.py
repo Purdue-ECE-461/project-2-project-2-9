@@ -103,6 +103,7 @@ def packageRetrieve(id):
         #     return convertJSONFormat(401, {'code': 401, 'message': 'You do not have permission to view the package.'})
 
         db = firebase.database()
+        packageNotFound = 1
 
         try:
             #Query for all packages:
@@ -115,6 +116,7 @@ def packageRetrieve(id):
                     # print(actions)
                 if db.child("Packages").child(packageKey).get().val()['Metadata']['ID'] == id:
                     # print("Reached here")
+                    packageNotFound = 0
                     for actions in db.child("Packages").child(packageKey).get().val():
                         # print(actions)
                         if actions != 'Metadata' and actions != 'packageData':
@@ -123,8 +125,8 @@ def packageRetrieve(id):
                             returnData.append(data)
                         # print(returnData)
                     return convertJSONFormat(200, returnData)
-                else:
-                    return convertJSONFormat(400, {'code': 400, 'message': 'No such package.'})
+            if packageNotFound:            
+                return convertJSONFormat(400, {'code': 400, 'message': 'No such package.'})
         except Exception:
             return convertJSONFormat(400, {'code': 400, 'message': 'Error in retrieving package.'})
     except Exception:
@@ -196,6 +198,7 @@ def updatePackageVersion(id):
             return convertJSONFormat(400, {'code': 400, 'message': 'Malformed request (e.g. no such package).'})
         
         db = firebase.database()
+        packageNotFound = 1
 
         #Check that Metadata matches URL
         try:
@@ -205,13 +208,15 @@ def updatePackageVersion(id):
                     # print(db.child("Packages").child(packageKey).get().val()['Metadata']['Name'])
                     if db.child("Packages").child(packageKey).get().val()['Metadata']['Name'] == metadata['Name'] and db.child("Packages").child(packageKey).get().val()['Metadata']['ID'] == metadata['ID'] and db.child("Packages").child(packageKey).get().val()['Metadata']['Version'] == metadata['Version']:
                         # print("reached here")
+                        packageNotFound = 0
                         db.child("Packages").child(packageKey).child("packageData").remove()
                         db.child("Packages").child(packageKey).child("packageData").set(data)
                         newData = {'Update' : {'User':{'name': currentUserName, 'isAdmin': currentIsAdmin},'Date': f"{datetime.datetime.now()}",'PackageMetadata': metadata,'Action': "Update"}}
                         db.child("Packages").child(packageKey).update(newData)
                         return convertJSONFormat(200, {'code' : 200, 'message': 'Package Updated'})
-                    else:
-                        return convertJSONFormat(400, {'code' : 400, 'message': 'Something went wrong woth updating'})
+                
+                if packageNotFound:
+                    return convertJSONFormat(400, {'code' : 400, 'message': 'Something went wrong with updating'})
 
                 #Add filters for name...
                 # search.order_by_child("Name").equal_to(metadata["Name"])
@@ -265,6 +270,7 @@ def deletePackageVersion(id):
         #     return convertJSONFormat(401, {'code': 401, 'message': 'You do not have permission '})
 
         db = firebase.database()
+        packageNotFound = 1
 
         #Try Deleting the package:
         try:
@@ -273,10 +279,11 @@ def deletePackageVersion(id):
                 # print(db.child("Packages").get().val()[packageKey])
                 if db.child("Packages").child(packageKey).get().val()['Metadata']['ID'] == id:
                     # print("Package Removed")
+                    packageNotFound = 0
                     db.child("Packages").child(packageKey).remove()
                     return convertJSONFormat(200, {'code': 200, 'message': 'Package is deleted.'})
-                else:
-                    return convertJSONFormat(400, {'code': 400, 'message': 'No such package.'})
+            if packageNotFound:
+                return convertJSONFormat(400, {'code': 400, 'message': 'No such package.'})
         except Exception:
             return convertJSONFormat(400, {'code': 400, 'message': 'Error in retrieving package for deletion.'})
 
@@ -511,8 +518,9 @@ def createPackage():
         #Check if Package is INGESTIBLE
         if packageURL:
             # print("URL Rating Startd")
+            # print(packageURL)
             packageRatings = rate.call_main(packageURL)
-            # print(packageRatings)
+            print(packageRatings)
             if packageRatings[0] > 0.5:
             # data = {'Name': metadata['Name'], 'Version': metadata['Version'], 'ID': metadata['ID'], 'packageData': data}
             # db.child("Packages").child(metadata['ID']).set(data)
@@ -587,6 +595,7 @@ def getPackageByName(name):
         #     return convertJSONFormat(401, {'code': 401, 'message': 'You do not have permission to view the package.'})
 
         db = firebase.database()
+        packageNotFound = 1
 
         try:
             #Query for all packages:
@@ -599,6 +608,7 @@ def getPackageByName(name):
                     # print(actions)
                 if db.child("Packages").child(packageKey).get().val()['Metadata']['Name'] == name:
                     # print("Reached here")
+                    packageNotFound = 0
                     for actions in db.child("Packages").child(packageKey).get().val():
                         # print(actions)
                         if actions != 'Metadata' and actions != 'packageData':
@@ -607,8 +617,8 @@ def getPackageByName(name):
                             data = db.child("Packages").child(packageKey).child(actions).get().val()
                             returnData.append(data)
                     return convertJSONFormat(200, returnData)
-                else:
-                    return convertJSONFormat(400, {'code': 400, 'message': 'No such package.'})
+            if packageNotFound:
+                return convertJSONFormat(400, {'code': 400, 'message': 'No such package.'})
         except Exception:
             return convertJSONFormat(400, {'code': 400, 'message': 'Error in retrieving package.'})
     except Exception:
@@ -631,6 +641,7 @@ def deletePackageVersions(name):
         #     return convertJSONFormat(401, {'code': 401, 'message': 'You do not have permission '})
 
         db = firebase.database()
+        packageNotFound = 1
 
         #Try Deleting the package:
         try:
@@ -639,10 +650,11 @@ def deletePackageVersions(name):
                 # print(db.child("Packages").get().val()[packageKey])
                 if db.child("Packages").child(packageKey).get().val()['Metadata']['Name'] == name:
                     # print("Package Removed")
+                    packageNotFound = 0
                     db.child("Packages").child(packageKey).remove()
                     return convertJSONFormat(200, {'code': 200, 'message': 'Package is deleted.'})
-                else:
-                    return convertJSONFormat(400, {'code': 400, 'message': 'No such package.'})
+            if packageNotFound:
+                return convertJSONFormat(400, {'code': 400, 'message': 'No such package.'})
         except Exception:
             return convertJSONFormat(400, {'code': 400, 'message': 'Error in retrieving package for deletion.'})
 
