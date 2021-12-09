@@ -501,7 +501,7 @@ def createPackage():
         if db.child("Packages").get().val():
             for packageKey in db.child("Packages").get().val():
                 # print(packageKey)
-                if req_body['metadata']['ID'] == packageKey:
+                if db.child("Packages").child(packageKey).get().val()['Metadata']['Name'] == metadata['Name'] and db.child("Packages").child(packageKey).get().val()['Metadata']['ID'] == metadata['ID'] and db.child("Packages").child(packageKey).get().val()['Metadata']['Version'] == metadata['Version']:
                     return convertJSONFormat(403, {'code': 403, 'message': 'Package exists already.'})
         #Check if Package is INGESTIBLE
         if packageURL:
