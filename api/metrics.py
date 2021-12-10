@@ -81,34 +81,34 @@ class Metrics:
             pass
 
         #Clone Repo
-        Repo.clone_from(self.repoUrl, './repositories/' + self.moduleName)
-        logging.info(f"The repo for {self.moduleName} is cloned to your local machine!")
+        # Repo.clone_from(self.repoUrl, './repositories/' + self.moduleName)
+        # logging.info(f"The repo for {self.moduleName} is cloned to your local machine!")
 
-        for filename in os.listdir('./repositories/' + self.moduleName):
-            if filename.lower().startswith('readme'):
-                f = open('./repositories/' + self.moduleName + '/' + filename, 'r')
-                break
-        else:
-            shutil.rmtree('./repositories/' + self.moduleName)
-            os.rmdir('./repositories')
-            self.rampUpScore = round(rampUpScore, 2)
-            return
+        # for filename in os.listdir('./repositories/' + self.moduleName):
+        #     if filename.lower().startswith('readme'):
+        #         f = open('./repositories/' + self.moduleName + '/' + filename, 'r')
+        #         break
+        # else:
+        #     shutil.rmtree('./repositories/' + self.moduleName)
+        #     os.rmdir('./repositories')
+        #     self.rampUpScore = round(rampUpScore, 2)
+        #     return
 
-        readme = f.readlines()
+        # readme = f.readlines()
 
-        increments = {"installation": 0.2, "install": 0.2,"usage": 0.2, "wiki": 0.1, "description": 0.1, "resources": 0.1, "faq": 0.1,"setup":0.2,"troubleshooting":0.1,"frequently asked questions":0.1,"additional resources":0.1,"overview":0.1,"methods":0.2,"getting started":0.2,"commands":0.1,"features":0.2,"modules":0.1}
+        # increments = {"installation": 0.2, "install": 0.2,"usage": 0.2, "wiki": 0.1, "description": 0.1, "resources": 0.1, "faq": 0.1,"setup":0.2,"troubleshooting":0.1,"frequently asked questions":0.1,"additional resources":0.1,"overview":0.1,"methods":0.2,"getting started":0.2,"commands":0.1,"features":0.2,"modules":0.1}
 
-        for line in readme:
-            if line.startswith("#"):
-                match = re.search(r"installation|install|wiki|setup|usage|methods|modules|description|overview|resources|faq|frequently asked questions|additional resources|troubleshooting|getting started|commands|features",line,flags=re.I)
-                if match:
-                    match = match.group().lstrip('# ').lower()
-                    rampUpScore += increments[match]
-        f.close()
-        #Delete cloned repo
-        shutil.rmtree('./repositories/' + self.moduleName)
-        os.rmdir('./repositories')
-        logging.info(f"The repo for {self.moduleName} is deleted from your local machine!")
+        # for line in readme:
+        #     if line.startswith("#"):
+        #         match = re.search(r"installation|install|wiki|setup|usage|methods|modules|description|overview|resources|faq|frequently asked questions|additional resources|troubleshooting|getting started|commands|features",line,flags=re.I)
+        #         if match:
+        #             match = match.group().lstrip('# ').lower()
+        #             rampUpScore += increments[match]
+        # f.close()
+        # #Delete cloned repo
+        # shutil.rmtree('./repositories/' + self.moduleName)
+        # os.rmdir('./repositories')
+        # logging.info(f"The repo for {self.moduleName} is deleted from your local machine!")
 
         if rampUpScore >= 1.0:
             rampUpScore = 1.0
@@ -270,17 +270,17 @@ class Metrics:
         
 
     def runMetrics(self) -> None:
-        # self.setRampUp()
+        self.setRampUp()
         # print("RampUp Work")
         self.setCorrectness()
-        print("setCorrectness Work")
+        # print("setCorrectness Work")
         self.setBusFactor()
-        print("setBusFactor Work")
+        # print("setBusFactor Work")
         self.setResponsiveMaintainer()
-        print("setResponsiveMaintainer Work")
+        # print("setResponsiveMaintainer Work")
         self.setLicense()
-        print("setLicense Work")
+        # print("setLicense Work")
         self.setDependencyScore()
-        print("setDependencyScore Work")
+        # print("setDependencyScore Work")
         self.setNet()
-        print("setNet Work")
+        # print("setNet Work")
