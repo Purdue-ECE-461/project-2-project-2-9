@@ -62,9 +62,9 @@ class Metrics:
         rampUpScore = 0
 
         response = handler.getRepoInfo(self.moduleOwner, self.moduleName)
-        logging.debug(f"RampUp(repoInfo) response for {self.moduleName} is empty: {len(response) == 0}")
+        # logging.debug(f"RampUp(repoInfo) response for {self.moduleName} is empty: {len(response) == 0}")
         commProfile = handler.getCommunityProfile(self.moduleOwner, self.moduleName)
-        logging.debug(f"RampUp(commProfile) response for {self.moduleName} is empty: {len(commProfile) == 0}")
+        # logging.debug(f"RampUp(commProfile) response for {self.moduleName} is empty: {len(commProfile) == 0}")
 
         try:
             if 'documentation' in commProfile:
@@ -77,7 +77,8 @@ class Metrics:
                 if response['has_pages']:
                     rampUpScore += 0.1
         except TypeError:
-            logging.info("(setRampUp) API response doesn't have the necessary fields for metric calculation!")
+            # logging.info("(setRampUp) API response doesn't have the necessary fields for metric calculation!")
+            pass
 
         #Clone Repo
         Repo.clone_from(self.repoUrl, './repositories/' + self.moduleName)
@@ -269,9 +270,9 @@ class Metrics:
         
 
     def runMetrics(self) -> None:
-        self.setRampUp()
-        print("RampUp Work")
-        # self.setCorrectness()
+        # self.setRampUp()
+        # print("RampUp Work")
+        self.setCorrectness()
         # print("setCorrectness Work")
         # self.setBusFactor()
         # print("setBusFactor Work")
