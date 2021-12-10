@@ -89,14 +89,14 @@ def call_main(url):
 
     # Handle the URL, check formatting and get github repo if it's an npmjs link.
     githubRepo, isValid = handleURL(url)
-    # print("handleURL(url) works")
+    print("handleURL(url) works")
 
         # If the repo is valid, run the metrics to get scores.
         # If the repo is not valid, make a metrics object but dont get scores. Default is -1 for all scores.
     if isValid:
         repoMetrics = metrics.Metrics(githubRepo)
         repoMetrics.runMetrics()
-        # print(" runMetrics() works")
+        print(" runMetrics() works")
     else:
         repoMetrics = metrics.Metrics(url)
 
