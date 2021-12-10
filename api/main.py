@@ -518,16 +518,16 @@ def createPackage():
         if packageURL:
             # print("URL Rating Startd")
             # print(packageURL)
-            # packageRatings = rate.call_main(packageURL)
+            packageRatings = rate.call_main(packageURL)
             # print(packageRatings)
-            # if packageRatings[0] > 0.5:
+            if packageRatings[0] > 0.5:
             # data = {'Name': metadata['Name'], 'Version': metadata['Version'], 'ID': metadata['ID'], 'packageData': data}
             # db.child("Packages").child(metadata['ID']).set(data)
                 packageMetaData = {'Name': metadata['Name'], 'Version': metadata['Version'], 'ID': metadata['ID']}
                 data = {'Ingest' : {'User':{'name': currentUserName, 'isAdmin': currentIsAdmin},'Date': f"{datetime.datetime.now()}",'PackageMetadata': packageMetaData, 'Action': "Create" }, 'Metadata': packageMetaData, 'packageData': data}
                 db.child("Packages").child(metadata['ID']).set(data)
-            # else:
-            #     return convertJSONFormat(400, {'code': 400, 'message': 'Package trying to get ingested has a rating lower than 0.5'})
+            else:
+                return convertJSONFormat(400, {'code': 400, 'message': 'Package trying to get ingested has a rating lower than 0.5'})
             # print("Pakage Created when URL was provided")
         if packageContent:
             # print("The world is here")
