@@ -22,17 +22,14 @@ config = {
   "databaseURL": "https://lexical-botany-331616-default-rtdb.firebaseio.com/",
   "storageBucket": "lexical-botany-331616.appspot.com"
 }
-
 firebase = pyrebase.initialize_app(config)
 app = Flask(__name__)
 # db = firebase.database()
 auth = firebase.auth()
 api=Api(app)
-
 """
 Begin helper functions:
 """
-
 def convertJSONFormat(code, data):
     response = app.response_class(
         response=json.dumps(data),
