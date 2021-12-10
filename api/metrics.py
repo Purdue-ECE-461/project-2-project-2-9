@@ -67,12 +67,15 @@ class Metrics:
         logging.debug(f"RampUp(commProfile) response for {self.moduleName} is empty: {len(commProfile) == 0}")
 
         try:
-            if commProfile['documentation'] is not None:
-                rampUpScore += 0.2
-            if response['has_wiki']:
-                rampUpScore += 0.2
-            if response['has_pages']:
-                rampUpScore += 0.1
+            if 'documentation' in commProfile:
+                if commProfile['documentation'] is not None:
+                    rampUpScore += 0.2
+            if 'has_wiki' in response:
+                if response['has_wiki']:
+                    rampUpScore += 0.2
+            if 'has_pages' in response:
+                if response['has_pages']:
+                    rampUpScore += 0.1
         except TypeError:
             logging.info("(setRampUp) API response doesn't have the necessary fields for metric calculation!")
 
@@ -116,10 +119,12 @@ class Metrics:
         starVal, forkVal = 0, 0 
 
         try:
-            starCount = response['stargazers_count']
-            forkCount = response['forks_count']
-            starVal = min(starCount*0.001, 1)
-            forkVal = min(forkCount*0.01, 1)
+            if 'stargazers_count' in response:
+                starCount = response['stargazers_count']
+                starVal = min(starCount*0.001, 1)
+            if 'forks_count' in response:
+                forkCount = response['forks_count']
+                forkVal = min(forkCount*0.01, 1) 
         except TypeError:
             logging.info("(setCorrectness) API response doesn't have the necessary fields for metric calculation!")
 
