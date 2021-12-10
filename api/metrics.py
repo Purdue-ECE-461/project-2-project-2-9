@@ -48,12 +48,14 @@ class Metrics:
             "correctnessScore": 0.2,
             "busFactorScore": 0.35,
             "responsiveMaintainerScore": 0.2,
+            "dependecyScore": 0.1
         }
 
         self.netScore = self.rampUpScore * weights["rampUpScore"] \
             + self.correctnessScore * weights["correctnessScore"] \
             + self.busFactorScore * weights["busFactorScore"] \
-            + self.responsiveMaintainerScore * weights['responsiveMaintainerScore']
+            + self.responsiveMaintainerScore * weights['responsiveMaintainerScore'] \
+            + self.dependencyScore * weights['dependecyScore']
 
         self.netScore = round(self.netScore, 2)
 
