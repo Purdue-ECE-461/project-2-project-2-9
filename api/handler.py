@@ -14,7 +14,7 @@ header = {
 
 
 def getRepoInfo(owner: str, module: str) -> dict:
-    response = requests.get(url='https://api.github.com/repos/' + owner + '/' + module , headers=header).json()
+    response = requests.get(url='https://api.github.com/repos/' + owner + '/' + module ).json()
     if len(response) == 0:
         logging.info(f"getRepoInfo response for {module} is empty!")
         logging.debug(f"getRepoInfo response for {module} is empty!")
@@ -22,7 +22,7 @@ def getRepoInfo(owner: str, module: str) -> dict:
 
 
 def getCommunityProfile(owner: str, module: str) -> dict:
-    response = requests.get(url='https://api.github.com/repos/' + owner + '/' + module + '/community/profile', headers=header).json()
+    response = requests.get(url='https://api.github.com/repos/' + owner + '/' + module + '/community/profile').json()
     if len(response) == 0:
         logging.info(f"getCommunityProfile response for {module} is empty!")
         logging.debug(f"getCommunityProfile response for {module} is empty! Please check your input URl or authentication tokens")
@@ -35,7 +35,7 @@ def getCommits(owner: str, module: str) -> dict:
         'since':  monthAgo.isoformat(),
         'per_page': '100'
     }
-    response = requests.get(url='https://api.github.com/repos/' + owner + '/' + module + '/commits', headers=header, params=param).json()
+    response = requests.get(url='https://api.github.com/repos/' + owner + '/' + module + '/commits', params=param).json()
     if len(response) == 0:
         logging.info(f"getCommits response for {module} is empty!")
         logging.debug(f"getCommits response for {module} is empty!")
@@ -47,7 +47,7 @@ def getIssues(owner: str, module: str) -> dict:
         'state': 'closed',
         'per_page': '100'
     }
-    response = requests.get(url='https://api.github.com/repos/' + owner + '/' + module + '/issues', headers=header, params=param).json()
+    response = requests.get(url='https://api.github.com/repos/' + owner + '/' + module + '/issues', params=param).json()
     if len(response) == 0:
         logging.info(f"getIssues response for {module} is empty!")
         logging.debug(f"getIssues response for {module} is empty!")
@@ -92,7 +92,7 @@ def getDependencies(owner: str, module: str) -> dict:
     # response = requests.get(baseURL, headers=headers)
     # data = response.json()
     # print("Before Requests")
-    data = requests.get(url='https://api.github.com/repos/' + owner + '/' + module + '/contents/package.json',  headers=header).json()
+    data = requests.get(url='https://api.github.com/repos/' + owner + '/' + module + '/contents/package.json').json()
     # print("After Requests")
     if 'content' in data:
         # print("Getting Here")
