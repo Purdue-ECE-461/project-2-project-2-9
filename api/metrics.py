@@ -71,13 +71,13 @@ class Metrics:
         try:
             if 'documentation' in commProfile:
                 if commProfile['documentation'] is not None:
-                    rampUpScore += 0.2
+                    rampUpScore += 0.4
             if 'has_wiki' in response:
                 if response['has_wiki']:
-                    rampUpScore += 0.2
+                    rampUpScore += 0.3
             if 'has_pages' in response:
                 if response['has_pages']:
-                    rampUpScore += 0.1
+                    rampUpScore += 0.2
         except TypeError:
             # logging.info("(setRampUp) API response doesn't have the necessary fields for metric calculation!")
             pass
